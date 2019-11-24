@@ -112,3 +112,13 @@ backend that is provided from Form.io.
 Enjoy!
 
 The Form.io Team!
+
+
+## Release
+
+``` 
+yarn gulp
+zip release.zip -r . -x "bower_components/*" "node_modules/*" ".git/*"
+```
+
+upload zip to new release

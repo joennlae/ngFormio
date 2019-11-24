@@ -40,3 +40,8 @@ require('./page')(app);
 require('./panel')(app);
 require('./table')(app);
 require('./well')(app);
+
+
+// Custom
+
+require('./rangeslider')(app);
