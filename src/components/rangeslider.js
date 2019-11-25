@@ -1,55 +1,36 @@
-module.exports = function(app) {
+module.exports = function (app) {
   app.config([
     'formioComponentsProvider',
-    function(formioComponentsProvider) {
-      var isNumeric = function isNumeric(n) {
-        return !isNaN(parseFloat(n)) && isFinite(n);
-      };
+    function (formioComponentsProvider) {
       formioComponentsProvider.register('rangeslider', {
-        title: 'Range Slider',
+        title: 'Rangeslider',
         template: 'formio/components/rangeslider.html',
+        group: 'advanced',
         settings: {
           input: true,
           tableView: true,
-          inputType: 'text',
-          label: '',
-          key: 'numberField',
-          placeholder: '',
-          prefix: '',
-          suffix: '',
+          label: 'Rangeslider',
+          key: 'rangeslider',
+          questions: [],
+          values: [],
           defaultValue: '',
           protected: false,
           persistent: true,
+          hidden: false,
+          clearOnHide: true,
           validate: {
             required: false,
-            min: '',
-            max: '',
-            step: 'any',
-            integer: '',
-            multiple: '',
-            custom: ''
+            custom: '',
+            customPrivate: false
           }
-        },
-        controller: ['$scope', function($scope) {
-          if ($scope.builder) return; // FOR-71 - Skip parsing input data.
-
-          // Ensure that values are numbers.
-          if (
-              $scope.data &&
-              $scope.data.hasOwnProperty($scope.component.key) &&
-              isNumeric($scope.data[$scope.component.key])
-          ) {
-            $scope.data[$scope.component.key] = parseFloat($scope.data[$scope.component.key]);
-          }
-        }]
+        }
       });
     }
   ]);
-
   app.run([
     '$templateCache',
     'FormioUtils',
-    function($templateCache, FormioUtils) {
+    function ($templateCache, FormioUtils) {
       $templateCache.put('formio/components/rangeslider.html', FormioUtils.fieldWrap(
         "<div class=\"range-container\"\n>\n" +
         "<div class=\"range-hack\"\n>\n" +
