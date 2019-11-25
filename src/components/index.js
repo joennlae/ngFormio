@@ -32,6 +32,7 @@ require('./container')(app);
 require('./datagrid')(app);
 require('./editgrid')(app);
 require('./survey')(app);
+require('./rangeslider')(app);
 
 // Layout
 require('./columns')(app);
@@ -40,8 +41,3 @@ require('./page')(app);
 require('./panel')(app);
 require('./table')(app);
 require('./well')(app);
-
-
-// Custom
-
-require('./rangeslider')(app);
