@@ -1,7 +1,7 @@
-module.exports = function (app) {
+module.exports = function(app) {
   app.config([
     'formioComponentsProvider',
-    function (formioComponentsProvider) {
+    function(formioComponentsProvider) {
       var isNumeric = function isNumeric(n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
       };
@@ -30,14 +30,14 @@ module.exports = function (app) {
             custom: ''
           }
         },
-        controller: ['$scope', function ($scope) {
+        controller: ['$scope', function($scope) {
           if ($scope.builder) return; // FOR-71 - Skip parsing input data.
 
           // Ensure that values are numbers.
           if (
-            $scope.data &&
-            $scope.data.hasOwnProperty($scope.component.key) &&
-            isNumeric($scope.data[$scope.component.key])
+              $scope.data &&
+              $scope.data.hasOwnProperty($scope.component.key) &&
+              isNumeric($scope.data[$scope.component.key])
           ) {
             $scope.data[$scope.component.key] = parseFloat($scope.data[$scope.component.key]);
           }
@@ -49,7 +49,7 @@ module.exports = function (app) {
   app.run([
     '$templateCache',
     'FormioUtils',
-    function ($templateCache, FormioUtils) {
+    function($templateCache, FormioUtils) {
       $templateCache.put('formio/components/rangeslider.html', FormioUtils.fieldWrap(
         "<div class=\"range-container\"\n>\n" +
         "<div class=\"range-hack\"\n>\n" +
