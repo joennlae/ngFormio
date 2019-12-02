@@ -5,6 +5,7 @@ module.exports = function (app) {
       formioComponentsProvider.register('timeline', {
         title: 'Timeline',
         template: 'formio/components/timeline.html',
+        group: 'advanced',
         settings: {
           input: true,
           inputType: 'text',

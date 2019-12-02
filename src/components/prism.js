@@ -8,6 +8,7 @@ module.exports = function (app) {
       formioComponentsProvider.register('prism', {
         title: 'Prism',
         template: 'formio/components/prism.html',
+        group: 'advanced',
         settings: {
           input: true,
           tableView: true,
