@@ -5,8 +5,8 @@ module.exports = function(app) {
     'formioComponentsProvider',
     function(formioComponentsProvider) {
       formioComponentsProvider.register('surveyImage', {
-        title: 'Survey',
-        template: 'formio/components/survey.html',
+        title: 'Survey Image',
+        template: 'formio/components/surveyImages.html',
         group: 'advanced',
         tableView: function(data, options) {
           var view = '<table class="table table-striped table-bordered"><thead>';
@@ -18,7 +18,7 @@ module.exports = function(app) {
             angular.forEach(options.component.questions, function(question) {
               view += '<tr>';
               view += '<th>' + question.label + '</th>';
-              view += '<td><img src="' + values[data[question.value]] + '" /></td>';
+              view += '<td>' + values[data[question.value]] + '</td>';
               view += '</tr>';
             });
           }
@@ -50,8 +50,8 @@ module.exports = function(app) {
     '$templateCache',
     'FormioUtils',
     function($templateCache, FormioUtils) {
-      $templateCache.put('formio/components/survey.html', FormioUtils.fieldWrap(
-        fs.readFileSync(__dirname + '/../templates/components/survey.html', 'utf8')
+      $templateCache.put('formio/components/surveyImages.html', FormioUtils.fieldWrap(
+        fs.readFileSync(__dirname + '/../templates/components/surveyImages.html', 'utf8')
       ));
     }
   ]);
