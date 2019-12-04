@@ -32,6 +32,7 @@ module.exports = function(app) {
           key: 'surveyImage',
           questions: [],
           values: [],
+          text_labels: [],
           defaultValue: '',
           protected: false,
           persistent: true,
