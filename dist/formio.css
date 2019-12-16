@@ -299,3 +299,275 @@ input[type="password"][draggable="true"] {
   /*margin-left: 24.999999995%; */
   /*}*/
 }
+
+.field-required:after {
+  color:red;
+  content:" *";
+}
+
+.ui-select-match > .btn-default {
+  color: #333;
+  border-color: #eee;
+}
+
+.field-required-inline {
+  color:red;
+  z-index: 5;
+}
+
+.form-field-type-hidden {
+  margin: 0;
+  padding: 0;
+}
+
+.form-field-type-signature img {
+  width: 100%;
+}
+
+.datetime-picker-dropdown div > table .btn-default {
+  border: 0;
+  background-color: #fff;
+}
+
+.datetime-picker-dropdown div > table .btn-default:hover {
+  background-color: #ccc;
+}
+
+.datetime-picker-dropdown div > table .btn-default.active {
+  background-color: #ccc;
+}
+
+.has-feedback .datetime-picker-dropdown .form-control {
+  padding: inherit;
+}
+
+.form-control.btn-default {
+  background-color: #fff;
+}
+
+.glyphicon.formio-hidden {
+  display: none;
+}
+
+/* Handle overflow of long matched placeholder/text without covering caret */
+.has-feedback .form-control.ui-select-toggle {
+  padding-right: 20px;
+}
+.ui-select-placeholder, .ui-select-match-text {
+  width: 100%;
+  margin-right: -15px;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.ui-select-container {
+  min-width: 200px;
+}
+
+/* FOR-109 */
+.input-group .form-control {
+  z-index: inherit;
+}
+.input-group .form-control.ui-select-search {
+  float: none;
+}
+.form-group .form-field-type-select {
+  display: inline-block;
+  width: 100%;
+}
+
+/* Fix Safari bug that prevents you from typing in draggable password fields */
+input[type="password"][draggable="true"] {
+  -webkit-user-select:text !important;
+}
+
+.glyphicon-spin {
+  -webkit-animation: spin-anim 1s infinite;
+  animation: spin-anim 1s infinite;
+}
+@-webkit-keyframes spin-anim {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+@keyframes spin-anim {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+
+.formio-submission:hover {
+  background-color: rgba(0, 0, 0, .025);
+}
+
+.formio-submission:active {
+  background-color: rgba(0, 0, 0, .05);
+}
+
+.form-field-type-file .fileSelector,
+.component-type-file .fileSelector {
+  padding: 15px;
+  border: 2px dashed #ddd;
+  text-align: center;
+}
+
+.form-field-type-file .fileSelector.fileDragOver,
+.component-type-file .fileSelector.fileDragOver {
+  border-color: #127abe;
+}
+
+.form-field-type-file .fileSelector .glyphicon,
+.component-type-file .fileSelector .glyphicon {
+  font-size: 20px;
+  margin-right: 5px;
+}
+
+.component-type-selectboxes .checkbox-inline input[type="checkbox"],
+.form-field-type-selectboxes .checkbox-inline input[type="checkbox"],
+.form-field-type-radio .radio-inline input[type="radio"]
+.component-type-radio .radio-inline input[type="radio"] {
+  margin-top: 4px;
+}
+
+.form-field-type-table .form-group {
+  margin-bottom: 0px;
+}
+
+/* FA-877 - Fix component widths in the data grid with prefix/sufix. */
+.input-group {
+  width: 100%;
+}
+.form-field-type-datagrid .input-group {
+  width: auto;
+}
+
+.form-field-type-datagrid .form-group {
+  margin-bottom: 0;
+}
+
+.form-field-type-datagrid .datagrid-table {
+  margin-bottom: 0px;
+}
+
+.form-field-type-datagrid .datagrid-add {
+  margin-bottom: 20px;
+}
+
+.form-field-type-datetime .input-group,
+.form-field-type-datetime .input-group-btn {
+  width: 100%;
+}
+.form-field-type-datetime .input-group-btn {
+  width: auto;
+}
+
+/*Form Wizard*/
+.bs-wizard {border-bottom: solid 1px #e0e0e0; padding: 0 0 10px 0;line-height: 1em;}
+.bs-wizard > .bs-wizard-step {padding: 0; position: relative;}
+.bs-wizard > .bs-wizard-step + .bs-wizard-step {}
+.bs-wizard > .bs-wizard-step .bs-wizard-stepnum-wrapper {position:absolute;width:100%}
+.bs-wizard > .bs-wizard-step .bs-wizard-stepnum {color: #595959; font-size: 12px; line-height:15px;}
+.bs-wizard > .bs-wizard-step .bs-wizard-info {color: #999; font-size: 14px;}
+.bs-wizard > .bs-wizard-step > .bs-wizard-dot {position: absolute; width: 30px; height: 30px; display: block; top: 25px; left: 50%; margin-top: -15px; margin-left: -15px; border-radius: 50%; cursor:pointer;z-index:10;}
+.bs-wizard.hasTitles > .bs-wizard-step > .bs-wizard-dot {top: 45px;}
+.bs-wizard > .bs-wizard-step > .bs-wizard-dot > .bs-wizard-dot-inner {width: 14px; height: 14px; border-radius: 50px; position: absolute; top: 8px; left: 8px; }
+.bs-wizard > .bs-wizard-step > .progress {position: relative; border-radius: 0px; height: 10px; box-shadow: none; margin: 20px 0;border: none;padding: 0;}
+.bs-wizard.hasTitles > .bs-wizard-step > .progress {margin-top: 40px;}
+.bs-wizard > .bs-wizard-step > .progress > .progress-bar {width:0px; box-shadow: none;}
+.bs-wizard > .bs-wizard-step.complete > .progress > .progress-bar {width:100%;border-radius:0;}
+.bs-wizard > .bs-wizard-step.active > .progress > .progress-bar {width:50%;}
+.bs-wizard > .bs-wizard-step:first-child.active > .progress > .progress-bar {width:0%;}
+.bs-wizard > .bs-wizard-step:last-child.active > .progress > .progress-bar {width: 100%;}
+.bs-wizard > .bs-wizard-step.disabled > .bs-wizard-dot {background-color: #f5f5f5;}
+.bs-wizard > .bs-wizard-step.disabled > .bs-wizard-dot > .bs-wizard-dot-inner {opacity: 0;}
+.bs-wizard > .bs-wizard-step:first-child  > .progress {left: 50%; width: 50%;}
+.bs-wizard > .bs-wizard-step:last-child  > .progress {width: 50%;}
+.bs-wizard > .bs-wizard-step.disabled a.bs-wizard-dot{ pointer-events: none; }
+/*END Form Wizard*/
+
+
+.input-description {
+  padding: 0.2em;
+  font-size: 0.9em;
+}
+
+.swiper-container {
+  max-width: 800px;
+  height: 200px;
+}
+.swiper-slide {
+  text-align: center;
+  font-size: 15px;
+  background: #fff;
+  /* Center slide text vertically */
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+}
+.status {
+  display: flex;
+  justify-content: center;
+  border-top: 4px solid #601c5b;
+  position: relative;
+  transition: all 200ms ease-in ;
+  width: 100%;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.point {
+  content: '';
+  width: 25px;
+  height: 25px;
+  background-color: #e8eeff;
+  border-radius: 25px;
+  border: 4px solid #601c5b;
+  position: absolute;
+  top: -15px;
+  cursor: pointer;
+}
+.point:hover, .point:focus .point:active{
+  background: #601c5b;
+}
+.swiper-button-prev {
+  background-image: none !important;
+  opacity: 1 !important;
+}
+.swiper-button-next {
+  background-image: none !important;
+  opacity: 1 !important;
+}
+button-prev.swiper-button-disabled {
+  opacity:1 !important
+}
+
+.fa-angle-left {
+  font-size: 60px;
+  color: #601c5b;
+  top:90px
+}
+.fa-angle-right {
+  font-size: 60px;
+  color: #601c5b;
+  top:90px
+}
