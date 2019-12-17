@@ -1,51 +1,30 @@
-<ng-form name="{{ componentId }}" ng-model="data[component.key]" ng-model-options="{allowInvalid: true}" custom-validator="component.validate.custom">
-  <fieldset ng-if="component.fieldSet">
-    <legend ng-if="component.label">
-      {{ component.label }}
-      <formio-component-tooltip></formio-component-tooltip>
-    </legend>
-    <div ng-class="component.inline ? 'radio-inline' : 'radio'" ng-repeat="v in component.values track by $index">
-      <label class="control-label" for="{{ componentId }}-{{ v.value }}" id="{{ componentId +'-'+ v.value+'Label' }}" ng-style="getOptionLabelStyles(component)">
-        <span ng-if="topOrLeftOptionLabel(component)">{{ v.label | formioTranslate:null:options.building }}</span>
-        <input
-          type="{{ component.inputType }}"
-          id="{{ componentId }}-{{ v.value }}"
-          value="{{ v.value }}"
-          tabindex="{{ component.tabindex || 0 }}"
-          ng-model="data[component.key]"
-          ng-model-options="{allowInvalid: true}"
-          aria-labelledby="{{componentId +'-'+ v.value+'Label'}}"
-          ng-required="isRequired(component)"
-          custom-validator="component.validate.custom"
-          auto-focus="{{ $first }}"
-          ng-disabled="readOnly"
-          ng-style="getOptionInputStyles(component)"
-          formio-custom-attributes="{{component.attributes}}"
-        >
-        <span ng-if="!topOrLeftOptionLabel(component)">{{ v.label | formioTranslate:null:options.building | shortcut:v.shortcut }}</span>
-      </label>
-    </div>
-  </fieldset>
-  <div ng-class="component.inline ? 'radio-inline' : 'radio'" ng-repeat="v in component.values track by $index"
-       ng-if="!component.fieldSet">
-    <label class="control-label" for="{{ componentId }}-{{ v.value }}" id="{{ componentId +'-'+ v.value+'Label' }}" ng-style="getOptionLabelStyles(component)">
-      <span ng-if="topOrLeftOptionLabel(component)">{{ v.label | formioTranslate:null:options.building }}</span>
+<div ng-class="'prevent-split lt-0-5 left'">
+  <ng-form
+    name="{{ componentId }}"
+    ng-model="data[component.key]"
+    ng-required="isRequired(component)"
+    custom-validator="component.validate.custom"
+  >
+    <div
+      class="radio"
+      ng-class="'col-100 left lb-0-2 def'"
+      ng-repeat="v in component.values track by $index"
+    >
       <input
+        class="radio"
+        name="{{ componentId }}"
         type="{{ component.inputType }}"
         id="{{ componentId }}-{{ v.value }}"
         value="{{ v.value }}"
         tabindex="{{ component.tabindex || 0 }}"
-        aria-labelledby="{{componentId +'-'+ v.value+'Label'}}"
         ng-model="data[component.key]"
-        ng-model-options="{allowInvalid: true}"
-        auto-focus="{{ $first }}"
-        ng-required="isRequired(component)"
-        custom-validator="component.validate.custom"
+        ng-required="component.validate.required"
         ng-disabled="readOnly"
-        ng-style="getOptionInputStyles(component)"
-        formio-custom-attributes="{{component.attributes}}"
-      >
-      <span ng-if="!topOrLeftOptionLabel(component)">{{ v.label | formioTranslate:null:options.building | shortcut:v.shortcut }}</span>
-    </label>
-  </div>
-</ng-form>
+      />
+
+      <label for="{{ componentId }}-{{ v.value }}">
+        {{ v.label | formioTranslate }}
+      </label>
+    </div></ng-form
+  >
+</div>

@@ -21,7 +21,7 @@ module.exports = function(app) {
           disableOnInvalid: false,
           theme: 'primary'
         },
-        controller: ['$scope', '$location', 'FormioUtils', function($scope, $location, FormioUtils) {
+        controller: ['$scope', '$location', 'FormioUtils', '$stateParams', 'dataService', function($scope, $location, FormioUtils, $stateParams, dataService) {
           if ($scope.options && $scope.options.building) return;
           var clicked = false;
           var settings = $scope.component;
@@ -42,6 +42,21 @@ module.exports = function(app) {
             }
           };
 
+          $scope.setDefault = function(){
+            $scope.$emit('SurveysetDefault');
+          }
+          //$scope.showNextButton = true;
+          console.log($scope.showNextButton )
+          if($scope.component.event === 'onStartSurvey' && dataService.obj.currentPage === 0){
+                $scope.showNextButton = false;
+                $scope.$emit('deleteOnStartSurvey');
+          }
+
+          if(dataService.obj.ongoing == false && $stateParams.isPDF === 'false'){
+              $scope.showme = true;
+              }else{
+              $scope.showme = false
+          }
           $scope.hasError = function() {
             if (clicked && (settings.action === 'submit') && $scope.formioForm.$invalid) {
               $scope.disableBtn = true;
@@ -224,8 +239,8 @@ module.exports = function(app) {
     }
   ]);
   app.run([
-    '$templateCache',
-    function($templateCache) {
+    '$templateCache', 'dataService',
+    function($templateCache, dataService) {
       $templateCache.put('formio/components/button.html',
         fs.readFileSync(__dirname + '/../templates/components/button.html', 'utf8')
       );

@@ -3,7 +3,7 @@ var conformToMask = require('vanilla-text-mask').conformToMask;
 var _filter = require('lodash/filter');
 var _get = require('lodash/get');
 
-module.exports = function() {
+module.exports = function(dataService) {
   var hooks = {};
 
   function optionsLabelOnTheTopOrBottom(position) {
@@ -335,6 +335,9 @@ module.exports = function() {
         return false;
       }
 
+      var copyData = angular.copy(data);
+      dataService.obj.$scope.$emit('onVisible', copyData);
+      
       return this.checkVisible(component, row, data);
     },
     flattenComponents: formioUtils.flattenComponents,

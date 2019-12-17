@@ -1,43 +1,173 @@
-<div class="formio-wizard-wrapper">
-  <div class="row bs-wizard" style="border-bottom:0;" ng-class="{hasTitles: hasTitles}" ng-if="activePage.breadcrumb !== 'none'">
-    <div ng-class="{disabled: ($index > currentPage) && !formioOptions.wizardFreeNavigation, active: ($index == currentPage), complete: ($index < currentPage), noTitle: !page.title}" class="{{ colclass }} bs-wizard-step" ng-repeat="page in pages track by $index">
-      <div class="bs-wizard-stepnum-wrapper">
-        <div class="text-center bs-wizard-stepnum" ng-if="page.title">{{ page.title }}</div>
+<div class="col-center">
+
+  <div class="scrollmenu-bg"></div>
+
+  <div class="scrollmenu-wrapper">
+    <ul class="scrollmenu">
+      <div class="col-100 col-inner-lw-2 left lb-0-5 lt-0-5">
+        <div ng-repeat="page in pages track by $index">
+          <div class="medi-survey col-60 left headline-top showpagetwo"
+            ng-class="{active: ($index == currentPage), complete: ($index == currentPage), noTitle: !page.title}"
+            ng-if="page.title">
+            {{surveyTitle}} </div>
+
+        </div>
+
+        <div class="col-40 left">
+          <button class="mat-icon-button-small right survey-desktop-none"
+            ng-click="layer2.areaStatus = !layer2.areaStatus"> <span class="mat-button-wrapper">
+              <div class="mat-icon"> <i class="fa fa-list-ul" aria-hidden="true"> </i>
+              </div>
+            </span>
+          </button>
+
+
+          <button class="mat-icon-button-small right" ng-click="speichern(true)"
+            uib-tooltip="{{ 'survey.6' | translate }}" tooltip-placement="left"> <span class="mat-button-wrapper">
+              <div class="mat-icon"> <i class="fa fa-floppy-o" aria-hidden="true"> </i>
+              </div>
+            </span>
+          </button>
+
+
+          <button class="mat-icon-button-small right" data-toggle="modal" data-target="#resetModal"
+            uib-tooltip="{{ 'diary.118' | translate }}" tooltip-placement="left"> <span class="mat-button-wrapper">
+              <div class="mat-icon"> <i class="fa fa-undo" aria-hidden="true"> </i>
+              </div>
+            </span>
+          </button>
+
+
+        </div>
+
       </div>
-      <div class="progress"><div class="progress-bar progress-bar-primary"></div></div>
-      <a ng-click="goto($index)" class="bs-wizard-dot bg-primary"><div class="bs-wizard-dot-inner"
-        ng-class="{
-          'bg-success': !pageHasErrors[$index],
-          'bg-danger': pageHasErrors[$index],
-          'bg-warning': !pageWasVisited[$index] && currentPage > $index
-        }"></div></a>
+
+    </ul>
+
+    <div ng-class="{'outside' : layer2.areaStatus, 'inside' : !layer2.areaStatus}">
+
+      <div class="control-card-wrap-second">
+
+        <div class="section-wrapper default">
+          <div class="row bs-wizard" style="border-bottom:0;" ng-class="{hasTitles: hasTitles}">
+
+            <div class="section-link-wrapper" ng-repeat="page in pages track by $index">
+              <div class="col-100 left">
+                <div ng-show="($index > cPage.length) == true">
+                  <div class="disable-wrapper"></div>
+                </div>
+                <button
+                  ng-class="{active: ($index == currentPage), complete: ($index == currentPage), noTitle: !page.title}"
+                  class="section-link-button lb-0-5 lt-0-5" ng-if="page.title"
+                  ng-click="goto($index); layer2.areaStatus = !layer2.areaStatus">
+                  {{ page.title | formioTranslate }} </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <style type="text/css">
+        .bs-wizard>.bs-wizard-step:first-child {
+          margin-left: {
+              {
+              margin
+            }
+          }
+
+          %;
+        }
+      </style>
+    </div>
+
+    <div class="control-card-wrap-survey survey-mobile-none">
+      <div class="control-card-survey">
+        <div class="section-link-wrapper" ng-repeat="page in pages track by $index">
+          <div class="col-100 left">
+            <div ng-show="($index > cPage.length) == true">
+              <div class="disable-wrapper"></div>
+            </div>
+            <button
+              ng-class="{active: ($index == currentPage), complete: ($index == currentPage), noTitle: !page.title}"
+              class="section-link-button lb-0-5 lt-0-5" ng-if="page.title"
+              ng-click="goto($index); layer2.areaStatus = !layer2.areaStatus">
+              {{ page.title | formioTranslate }} </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div ng-show="!wizardLoaded" id="formio-loading" style="font-size: 2em;" class="formio-loading">
+    <div class="smiley-load">
+      <div class="loader-load">
+      </div>
+      <div class="dot-left">
+      </div>
+      <div class="dot-right">
+      </div>
     </div>
   </div>
-  <style type="text/css">.bs-wizard > .bs-wizard-step:first-child { margin-left: {{ margin }}%; }</style>
-  <i ng-show="!wizardLoaded" id="formio-loading" style="font-size: 2em;" class="glyphicon glyphicon-refresh glyphicon-spin"></i>
-  <div ng-repeat="alert in formioAlerts track by $index" class="alert alert-{{ alert.type }}" role="alert">{{ alert.message | formioTranslate:null:options.building }}</div>
-  <div class="formio-wizard">
-    <formio
-      ng-if="wizardLoaded"
-      submission="submission"
-      form="page"
-      url="url"
-      read-only="readOnly"
-      hide-components="hideComponents"
-      disable-components="disableComponents"
-      formio-options="formioOptions"
-      id="formio-wizard-form"
-      options="options"
-    ></formio>
+
+  <div ng-repeat="alert in formioAlerts track by $index" class="classname alert alert-{{ alert.type }}" role="alert">
+    {{ alert.message }}</div>
+
+  <div ng-if="isPDF">
+    <div class="formio-wizard" ng-repeat='page1 in pages'>
+      <formio ng-if="wizardLoaded" submission="submission" form="page1" url="url" read-only="readOnly"
+        hide-components="hideComponents" disable-components="disableComponents" formio-options="formioOptions"
+        id="formio-wizard-form"></formio>
+
+    </div>
+  </div>
+  <div ng-if="!isPDF" class="formio-wizard">
+    <formio ng-if="wizardLoaded" submission="submission" form="page" url="url" read-only="readOnly"
+      hide-components="hideComponents" disable-components="disableComponents" formio-options="formioOptions"
+      id="formio-wizard-form"></formio>
+
   </div>
   <ul ng-show="wizardLoaded" class="list-inline">
-    <li><a class="btn btn-default formio-wizard-button-cancel" ng-click="cancel()">Cancel</a></li>
-    <li ng-if="currentPage > 0"><a class="btn btn-primary formio-wizard-button-previous" ng-click="prev()">Previous</a></li>
-    <li ng-if="currentPage < (pages.length - 1)">
-      <a class="btn btn-primary formio-wizard-button-next" ng-click="next()">Next</a>
-    </li>
-    <li ng-if="currentPage >= (pages.length - 1)">
-      <a class="btn btn-primary formio-wizard-button-submit" ng-click="submit()">Submit Form</a>
-    </li>
+    <div class="modal fade" id="resetModal" tabindex="-1" role="dialog" aria-labelledby="resetModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header"> <button type="button" class="close" data-dismiss="modal"
+              aria-hidden="true">×</button>
+            <h2 class="modal-title" id="myModalLabel" translate="diary.117"></h2>
+          </div>
+          <div class="modal-footer"> <button type="button" class="btn btn-default" data-dismiss="modal"
+              translate="diary.2"></button> <button type="button" ng-click="cancel()" class="btn btn-default"
+              data-dismiss="modal" translate="diary.1"></button> </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div ng-if="currentPage < (form.components.length - 1)">
+
+      <div class="row pdf-none">
+        <div class="col-100 col-inner-lw-2 lb-1 lt-0-5 left">
+          <div ng-if="showNextButton">
+            <div ng-if="currentPage < (pages.length - 1)">
+              <a class="mat-raised-button mat-primary right" ng-click="next()"><span class="mat-button-wrapper"
+                  translate="diary.126"></span>
+              </a>
+            </div>
+
+          </div>
+
+          <div ng-if="currentPage > 0"><a class="mat-raised-button mat-primary right" ng-click="prev()"><span
+                class="mat-button-wrapper" translate="survey.10"></span>
+            </a></div>
+
+        </div>
+      </div>
+    </div>
   </ul>
 </div>

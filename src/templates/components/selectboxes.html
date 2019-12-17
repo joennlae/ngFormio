@@ -1,36 +1,12 @@
-<fieldset ng-if="component.fieldSet">
-  <legend ng-if="component.label" class="select-boxes-legend">
+<div class="select-boxes">
+  <div
+    ng-if="component.label && !component.hideLabel"
+    for="{{ componentId }}"
+    class="default col-100 left lb-0-5"
+    ng-class="{'field-required': component.validate.required}"
+  >
     {{ component.label }}
-    <formio-component-tooltip></formio-component-tooltip>
-  </legend>
-  <div class="select-boxes">
-    <formio-select-boxes
-      name="{{componentId}}"
-      ng-model="data[component.key]"
-      ng-model-options="{allowInvalid: true}"
-      component="component"
-      component-id="componentId"
-      read-only="readOnly"
-      aria-describedby="{{componentId + 'Desc'}}"
-      ng-required="isRequired(component)"
-      custom-validator="component.validate.custom"
-      grid-row="gridRow"
-      grid-col="gridCol"
-      options="options"
-      ng-style="getInputGroupStyles(component)"
-    ></formio-select-boxes>
-    <div ng-if="!!component.description" class="help-block">
-      <span id="{{ componentId+'Desc'  }}">{{ component.description }}</span>
-    </div>
-    <formio-errors ng-if="::!options.building"></formio-errors>
   </div>
-</fieldset>
-<div class="select-boxes" ng-if="!component.fieldSet">
-  <label ng-if="labelVisible() && (component.labelPosition !== 'bottom')" for="{{ componentId }}" class="control-label select-boxes-label" id="{{ componentId+'Label' }}" ng-class="{'field-required': isRequired(component)}"
-         ng-style="getLabelStyles(component)">
-    {{ component.label }}
-    <formio-component-tooltip></formio-component-tooltip>
-  </label>
   <formio-select-boxes
     name="{{componentId}}"
     ng-model="data[component.key]"
@@ -38,22 +14,10 @@
     component="component"
     component-id="componentId"
     read-only="readOnly"
-    ng-required="isRequired(component)"
+    ng-required="component.validate.required"
     custom-validator="component.validate.custom"
-    aria-labelledby="{{ componentId +'Label'}}"
-    aria-describedby="{{componentId + 'Desc'}}"
     grid-row="gridRow"
     grid-col="gridCol"
-    options="options"
-    ng-style="getInputGroupStyles(component)"
   ></formio-select-boxes>
-  <label ng-if="labelVisible() && (component.labelPosition === 'bottom')" for="{{ componentId }}" class="control-label control-label--bottom" id="{{ componentId +'Desc'}}"
-         ng-class="{'field-required': isRequired(component)}">
-    {{ component.label }}
-    <formio-component-tooltip></formio-component-tooltip>
-  </label>
-  <div ng-if="!!component.description" class="help-block">
-    <span id="{{ componentId+'Desc' }}">{{ component.description }}</span>
-  </div>
-  <formio-errors ng-if="::!options.building"></formio-errors>
+  <formio-errors></formio-errors>
 </div>

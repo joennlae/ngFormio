@@ -2,10 +2,12 @@ module.exports = [
   'Formio',
   'formioComponents',
   '$timeout',
+  'dataService',
   function(
     Formio,
     formioComponents,
-    $timeout
+    $timeout,
+    dataService
   ) {
     return {
       onError: function($scope, $element) {
@@ -42,6 +44,16 @@ module.exports = [
         $scope.formLoading = true;
         $scope.form = angular.isDefined($scope.form) ? $scope.form : {};
         $scope.submission = angular.isDefined($scope.submission) ? $scope.submission : {data: {}};
+
+        dataService.GetSurveyCMS(dataService.obj.title).then(function (res) {
+          if(res && $scope.submission && Object.keys($scope.submission.data).length == 0){
+              if(res.survey){
+
+                  // $scope.submission = {data:res.survey};
+                  dataService.obj.id = res.id;
+              }
+          }
+        });
         $scope.submissions = angular.isDefined($scope.submissions) ? $scope.submissions : [];
 
         // Keep track of the elements rendered.
