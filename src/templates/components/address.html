@@ -1,12 +1,7 @@
-<div
-  class="
-forms-intro"
-  ng-if="
-component.label && !component.hideLabel"
-  for="
-{{ componentId }}"
-  ng-class="
-{'field-required': component.validate.required}"
->
+<div class="
+forms-intro" ng-if="
+component.label && !component.hideLabel" for="
+{{ componentId }}" ng-class="
+{'field-required': component.validate.required}">
   {{ component.label | formioTranslate }}
 </div>
