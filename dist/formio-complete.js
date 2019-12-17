@@ -59058,7 +59058,7 @@ var Evaluator = {
 };
 var _default = Evaluator;
 exports.default = _default;
-},{"core-js/modules/es.array.concat":144,"core-js/modules/es.object.to-string":160,"core-js/modules/es.reflect.construct":161,"core-js/modules/es.regexp.to-string":164,"core-js/modules/es.string.replace":168,"lodash":397,"string-hash":424}],187:[function(_dereq_,module,exports){
+},{"core-js/modules/es.array.concat":144,"core-js/modules/es.object.to-string":160,"core-js/modules/es.reflect.construct":161,"core-js/modules/es.regexp.to-string":164,"core-js/modules/es.string.replace":168,"lodash":397,"string-hash":423}],187:[function(_dereq_,module,exports){
 "use strict";
 
 _dereq_("core-js/modules/es.array.concat");
@@ -91154,7 +91154,7 @@ module.exports = trimEnd;
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},_dereq_("timers").setImmediate)
-},{"timers":426}],418:[function(_dereq_,module,exports){
+},{"timers":425}],418:[function(_dereq_,module,exports){
 /*
  * ngDialog - easy modals and popup windows
  * http://github.com/likeastore/ngDialog
@@ -95236,618 +95236,6 @@ var isArray = Array.isArray || function (xs) {
 };
 
 },{}],423:[function(_dereq_,module,exports){
-/*!
- * Signature Pad v2.3.2
- * https://github.com/szimek/signature_pad
- *
- * Copyright 2017 Szymon Nowak
- * Released under the MIT license
- *
- * The main idea and some parts of the code (e.g. drawing variable width Bézier curve) are taken from:
- * http://corner.squareup.com/2012/07/smoother-signatures.html
- *
- * Implementation of interpolation using cubic Bézier curves is taken from:
- * http://benknowscode.wordpress.com/2012/09/14/path-interpolation-using-cubic-bezier-and-control-point-estimation-in-javascript
- *
- * Algorithm for approximated length of a Bézier curve is taken from:
- * http://www.lemoda.net/maths/bezier-length/index.html
- *
- */
-
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(global.SignaturePad = factory());
-}(this, (function () { 'use strict';
-
-function Point(x, y, time) {
-  this.x = x;
-  this.y = y;
-  this.time = time || new Date().getTime();
-}
-
-Point.prototype.velocityFrom = function (start) {
-  return this.time !== start.time ? this.distanceTo(start) / (this.time - start.time) : 1;
-};
-
-Point.prototype.distanceTo = function (start) {
-  return Math.sqrt(Math.pow(this.x - start.x, 2) + Math.pow(this.y - start.y, 2));
-};
-
-Point.prototype.equals = function (other) {
-  return this.x === other.x && this.y === other.y && this.time === other.time;
-};
-
-function Bezier(startPoint, control1, control2, endPoint) {
-  this.startPoint = startPoint;
-  this.control1 = control1;
-  this.control2 = control2;
-  this.endPoint = endPoint;
-}
-
-// Returns approximated length.
-Bezier.prototype.length = function () {
-  var steps = 10;
-  var length = 0;
-  var px = void 0;
-  var py = void 0;
-
-  for (var i = 0; i <= steps; i += 1) {
-    var t = i / steps;
-    var cx = this._point(t, this.startPoint.x, this.control1.x, this.control2.x, this.endPoint.x);
-    var cy = this._point(t, this.startPoint.y, this.control1.y, this.control2.y, this.endPoint.y);
-    if (i > 0) {
-      var xdiff = cx - px;
-      var ydiff = cy - py;
-      length += Math.sqrt(xdiff * xdiff + ydiff * ydiff);
-    }
-    px = cx;
-    py = cy;
-  }
-
-  return length;
-};
-
-/* eslint-disable no-multi-spaces, space-in-parens */
-Bezier.prototype._point = function (t, start, c1, c2, end) {
-  return start * (1.0 - t) * (1.0 - t) * (1.0 - t) + 3.0 * c1 * (1.0 - t) * (1.0 - t) * t + 3.0 * c2 * (1.0 - t) * t * t + end * t * t * t;
-};
-
-/* eslint-disable */
-
-// http://stackoverflow.com/a/27078401/815507
-function throttle(func, wait, options) {
-  var context, args, result;
-  var timeout = null;
-  var previous = 0;
-  if (!options) options = {};
-  var later = function later() {
-    previous = options.leading === false ? 0 : Date.now();
-    timeout = null;
-    result = func.apply(context, args);
-    if (!timeout) context = args = null;
-  };
-  return function () {
-    var now = Date.now();
-    if (!previous && options.leading === false) previous = now;
-    var remaining = wait - (now - previous);
-    context = this;
-    args = arguments;
-    if (remaining <= 0 || remaining > wait) {
-      if (timeout) {
-        clearTimeout(timeout);
-        timeout = null;
-      }
-      previous = now;
-      result = func.apply(context, args);
-      if (!timeout) context = args = null;
-    } else if (!timeout && options.trailing !== false) {
-      timeout = setTimeout(later, remaining);
-    }
-    return result;
-  };
-}
-
-function SignaturePad(canvas, options) {
-  var self = this;
-  var opts = options || {};
-
-  this.velocityFilterWeight = opts.velocityFilterWeight || 0.7;
-  this.minWidth = opts.minWidth || 0.5;
-  this.maxWidth = opts.maxWidth || 2.5;
-  this.throttle = 'throttle' in opts ? opts.throttle : 16; // in miliseconds
-  this.minDistance = 'minDistance' in opts ? opts.minDistance : 5;
-
-  if (this.throttle) {
-    this._strokeMoveUpdate = throttle(SignaturePad.prototype._strokeUpdate, this.throttle);
-  } else {
-    this._strokeMoveUpdate = SignaturePad.prototype._strokeUpdate;
-  }
-
-  this.dotSize = opts.dotSize || function () {
-    return (this.minWidth + this.maxWidth) / 2;
-  };
-  this.penColor = opts.penColor || 'black';
-  this.backgroundColor = opts.backgroundColor || 'rgba(0,0,0,0)';
-  this.onBegin = opts.onBegin;
-  this.onEnd = opts.onEnd;
-
-  this._canvas = canvas;
-  this._ctx = canvas.getContext('2d');
-  this.clear();
-
-  // We need add these inline so they are available to unbind while still having
-  // access to 'self' we could use _.bind but it's not worth adding a dependency.
-  this._handleMouseDown = function (event) {
-    if (event.which === 1) {
-      self._mouseButtonDown = true;
-      self._strokeBegin(event);
-    }
-  };
-
-  this._handleMouseMove = function (event) {
-    if (self._mouseButtonDown) {
-      self._strokeMoveUpdate(event);
-    }
-  };
-
-  this._handleMouseUp = function (event) {
-    if (event.which === 1 && self._mouseButtonDown) {
-      self._mouseButtonDown = false;
-      self._strokeEnd(event);
-    }
-  };
-
-  this._handleTouchStart = function (event) {
-    if (event.targetTouches.length === 1) {
-      var touch = event.changedTouches[0];
-      self._strokeBegin(touch);
-    }
-  };
-
-  this._handleTouchMove = function (event) {
-    // Prevent scrolling.
-    event.preventDefault();
-
-    var touch = event.targetTouches[0];
-    self._strokeMoveUpdate(touch);
-  };
-
-  this._handleTouchEnd = function (event) {
-    var wasCanvasTouched = event.target === self._canvas;
-    if (wasCanvasTouched) {
-      event.preventDefault();
-      self._strokeEnd(event);
-    }
-  };
-
-  // Enable mouse and touch event handlers
-  this.on();
-}
-
-// Public methods
-SignaturePad.prototype.clear = function () {
-  var ctx = this._ctx;
-  var canvas = this._canvas;
-
-  ctx.fillStyle = this.backgroundColor;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  this._data = [];
-  this._reset();
-  this._isEmpty = true;
-};
-
-SignaturePad.prototype.fromDataURL = function (dataUrl) {
-  var _this = this;
-
-  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-  var image = new Image();
-  var ratio = options.ratio || window.devicePixelRatio || 1;
-  var width = options.width || this._canvas.width / ratio;
-  var height = options.height || this._canvas.height / ratio;
-
-  this._reset();
-  image.src = dataUrl;
-  image.onload = function () {
-    _this._ctx.drawImage(image, 0, 0, width, height);
-  };
-  this._isEmpty = false;
-};
-
-SignaturePad.prototype.toDataURL = function (type) {
-  var _canvas;
-
-  switch (type) {
-    case 'image/svg+xml':
-      return this._toSVG();
-    default:
-      for (var _len = arguments.length, options = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-        options[_key - 1] = arguments[_key];
-      }
-
-      return (_canvas = this._canvas).toDataURL.apply(_canvas, [type].concat(options));
-  }
-};
-
-SignaturePad.prototype.on = function () {
-  this._handleMouseEvents();
-  this._handleTouchEvents();
-};
-
-SignaturePad.prototype.off = function () {
-  this._canvas.removeEventListener('mousedown', this._handleMouseDown);
-  this._canvas.removeEventListener('mousemove', this._handleMouseMove);
-  document.removeEventListener('mouseup', this._handleMouseUp);
-
-  this._canvas.removeEventListener('touchstart', this._handleTouchStart);
-  this._canvas.removeEventListener('touchmove', this._handleTouchMove);
-  this._canvas.removeEventListener('touchend', this._handleTouchEnd);
-};
-
-SignaturePad.prototype.isEmpty = function () {
-  return this._isEmpty;
-};
-
-// Private methods
-SignaturePad.prototype._strokeBegin = function (event) {
-  this._data.push([]);
-  this._reset();
-  this._strokeUpdate(event);
-
-  if (typeof this.onBegin === 'function') {
-    this.onBegin(event);
-  }
-};
-
-SignaturePad.prototype._strokeUpdate = function (event) {
-  var x = event.clientX;
-  var y = event.clientY;
-
-  var point = this._createPoint(x, y);
-  var lastPointGroup = this._data[this._data.length - 1];
-  var lastPoint = lastPointGroup && lastPointGroup[lastPointGroup.length - 1];
-  var isLastPointTooClose = lastPoint && point.distanceTo(lastPoint) < this.minDistance;
-
-  // Skip this point if it's too close to the previous one
-  if (!(lastPoint && isLastPointTooClose)) {
-    var _addPoint = this._addPoint(point),
-        curve = _addPoint.curve,
-        widths = _addPoint.widths;
-
-    if (curve && widths) {
-      this._drawCurve(curve, widths.start, widths.end);
-    }
-
-    this._data[this._data.length - 1].push({
-      x: point.x,
-      y: point.y,
-      time: point.time,
-      color: this.penColor
-    });
-  }
-};
-
-SignaturePad.prototype._strokeEnd = function (event) {
-  var canDrawCurve = this.points.length > 2;
-  var point = this.points[0]; // Point instance
-
-  if (!canDrawCurve && point) {
-    this._drawDot(point);
-  }
-
-  if (point) {
-    var lastPointGroup = this._data[this._data.length - 1];
-    var lastPoint = lastPointGroup[lastPointGroup.length - 1]; // plain object
-
-    // When drawing a dot, there's only one point in a group, so without this check
-    // such group would end up with exactly the same 2 points.
-    if (!point.equals(lastPoint)) {
-      lastPointGroup.push({
-        x: point.x,
-        y: point.y,
-        time: point.time,
-        color: this.penColor
-      });
-    }
-  }
-
-  if (typeof this.onEnd === 'function') {
-    this.onEnd(event);
-  }
-};
-
-SignaturePad.prototype._handleMouseEvents = function () {
-  this._mouseButtonDown = false;
-
-  this._canvas.addEventListener('mousedown', this._handleMouseDown);
-  this._canvas.addEventListener('mousemove', this._handleMouseMove);
-  document.addEventListener('mouseup', this._handleMouseUp);
-};
-
-SignaturePad.prototype._handleTouchEvents = function () {
-  // Pass touch events to canvas element on mobile IE11 and Edge.
-  this._canvas.style.msTouchAction = 'none';
-  this._canvas.style.touchAction = 'none';
-
-  this._canvas.addEventListener('touchstart', this._handleTouchStart);
-  this._canvas.addEventListener('touchmove', this._handleTouchMove);
-  this._canvas.addEventListener('touchend', this._handleTouchEnd);
-};
-
-SignaturePad.prototype._reset = function () {
-  this.points = [];
-  this._lastVelocity = 0;
-  this._lastWidth = (this.minWidth + this.maxWidth) / 2;
-  this._ctx.fillStyle = this.penColor;
-};
-
-SignaturePad.prototype._createPoint = function (x, y, time) {
-  var rect = this._canvas.getBoundingClientRect();
-
-  return new Point(x - rect.left, y - rect.top, time || new Date().getTime());
-};
-
-SignaturePad.prototype._addPoint = function (point) {
-  var points = this.points;
-  var tmp = void 0;
-
-  points.push(point);
-
-  if (points.length > 2) {
-    // To reduce the initial lag make it work with 3 points
-    // by copying the first point to the beginning.
-    if (points.length === 3) points.unshift(points[0]);
-
-    tmp = this._calculateCurveControlPoints(points[0], points[1], points[2]);
-    var c2 = tmp.c2;
-    tmp = this._calculateCurveControlPoints(points[1], points[2], points[3]);
-    var c3 = tmp.c1;
-    var curve = new Bezier(points[1], c2, c3, points[2]);
-    var widths = this._calculateCurveWidths(curve);
-
-    // Remove the first element from the list,
-    // so that we always have no more than 4 points in points array.
-    points.shift();
-
-    return { curve: curve, widths: widths };
-  }
-
-  return {};
-};
-
-SignaturePad.prototype._calculateCurveControlPoints = function (s1, s2, s3) {
-  var dx1 = s1.x - s2.x;
-  var dy1 = s1.y - s2.y;
-  var dx2 = s2.x - s3.x;
-  var dy2 = s2.y - s3.y;
-
-  var m1 = { x: (s1.x + s2.x) / 2.0, y: (s1.y + s2.y) / 2.0 };
-  var m2 = { x: (s2.x + s3.x) / 2.0, y: (s2.y + s3.y) / 2.0 };
-
-  var l1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
-  var l2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
-
-  var dxm = m1.x - m2.x;
-  var dym = m1.y - m2.y;
-
-  var k = l2 / (l1 + l2);
-  var cm = { x: m2.x + dxm * k, y: m2.y + dym * k };
-
-  var tx = s2.x - cm.x;
-  var ty = s2.y - cm.y;
-
-  return {
-    c1: new Point(m1.x + tx, m1.y + ty),
-    c2: new Point(m2.x + tx, m2.y + ty)
-  };
-};
-
-SignaturePad.prototype._calculateCurveWidths = function (curve) {
-  var startPoint = curve.startPoint;
-  var endPoint = curve.endPoint;
-  var widths = { start: null, end: null };
-
-  var velocity = this.velocityFilterWeight * endPoint.velocityFrom(startPoint) + (1 - this.velocityFilterWeight) * this._lastVelocity;
-
-  var newWidth = this._strokeWidth(velocity);
-
-  widths.start = this._lastWidth;
-  widths.end = newWidth;
-
-  this._lastVelocity = velocity;
-  this._lastWidth = newWidth;
-
-  return widths;
-};
-
-SignaturePad.prototype._strokeWidth = function (velocity) {
-  return Math.max(this.maxWidth / (velocity + 1), this.minWidth);
-};
-
-SignaturePad.prototype._drawPoint = function (x, y, size) {
-  var ctx = this._ctx;
-
-  ctx.moveTo(x, y);
-  ctx.arc(x, y, size, 0, 2 * Math.PI, false);
-  this._isEmpty = false;
-};
-
-SignaturePad.prototype._drawCurve = function (curve, startWidth, endWidth) {
-  var ctx = this._ctx;
-  var widthDelta = endWidth - startWidth;
-  var drawSteps = Math.floor(curve.length());
-
-  ctx.beginPath();
-
-  for (var i = 0; i < drawSteps; i += 1) {
-    // Calculate the Bezier (x, y) coordinate for this step.
-    var t = i / drawSteps;
-    var tt = t * t;
-    var ttt = tt * t;
-    var u = 1 - t;
-    var uu = u * u;
-    var uuu = uu * u;
-
-    var x = uuu * curve.startPoint.x;
-    x += 3 * uu * t * curve.control1.x;
-    x += 3 * u * tt * curve.control2.x;
-    x += ttt * curve.endPoint.x;
-
-    var y = uuu * curve.startPoint.y;
-    y += 3 * uu * t * curve.control1.y;
-    y += 3 * u * tt * curve.control2.y;
-    y += ttt * curve.endPoint.y;
-
-    var width = startWidth + ttt * widthDelta;
-    this._drawPoint(x, y, width);
-  }
-
-  ctx.closePath();
-  ctx.fill();
-};
-
-SignaturePad.prototype._drawDot = function (point) {
-  var ctx = this._ctx;
-  var width = typeof this.dotSize === 'function' ? this.dotSize() : this.dotSize;
-
-  ctx.beginPath();
-  this._drawPoint(point.x, point.y, width);
-  ctx.closePath();
-  ctx.fill();
-};
-
-SignaturePad.prototype._fromData = function (pointGroups, drawCurve, drawDot) {
-  for (var i = 0; i < pointGroups.length; i += 1) {
-    var group = pointGroups[i];
-
-    if (group.length > 1) {
-      for (var j = 0; j < group.length; j += 1) {
-        var rawPoint = group[j];
-        var point = new Point(rawPoint.x, rawPoint.y, rawPoint.time);
-        var color = rawPoint.color;
-
-        if (j === 0) {
-          // First point in a group. Nothing to draw yet.
-
-          // All points in the group have the same color, so it's enough to set
-          // penColor just at the beginning.
-          this.penColor = color;
-          this._reset();
-
-          this._addPoint(point);
-        } else if (j !== group.length - 1) {
-          // Middle point in a group.
-          var _addPoint2 = this._addPoint(point),
-              curve = _addPoint2.curve,
-              widths = _addPoint2.widths;
-
-          if (curve && widths) {
-            drawCurve(curve, widths, color);
-          }
-        } else {
-          // Last point in a group. Do nothing.
-        }
-      }
-    } else {
-      this._reset();
-      var _rawPoint = group[0];
-      drawDot(_rawPoint);
-    }
-  }
-};
-
-SignaturePad.prototype._toSVG = function () {
-  var _this2 = this;
-
-  var pointGroups = this._data;
-  var canvas = this._canvas;
-  var ratio = Math.max(window.devicePixelRatio || 1, 1);
-  var minX = 0;
-  var minY = 0;
-  var maxX = canvas.width / ratio;
-  var maxY = canvas.height / ratio;
-  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-
-  svg.setAttributeNS(null, 'width', canvas.width);
-  svg.setAttributeNS(null, 'height', canvas.height);
-
-  this._fromData(pointGroups, function (curve, widths, color) {
-    var path = document.createElement('path');
-
-    // Need to check curve for NaN values, these pop up when drawing
-    // lines on the canvas that are not continuous. E.g. Sharp corners
-    // or stopping mid-stroke and than continuing without lifting mouse.
-    if (!isNaN(curve.control1.x) && !isNaN(curve.control1.y) && !isNaN(curve.control2.x) && !isNaN(curve.control2.y)) {
-      var attr = 'M ' + curve.startPoint.x.toFixed(3) + ',' + curve.startPoint.y.toFixed(3) + ' ' + ('C ' + curve.control1.x.toFixed(3) + ',' + curve.control1.y.toFixed(3) + ' ') + (curve.control2.x.toFixed(3) + ',' + curve.control2.y.toFixed(3) + ' ') + (curve.endPoint.x.toFixed(3) + ',' + curve.endPoint.y.toFixed(3));
-
-      path.setAttribute('d', attr);
-      path.setAttribute('stroke-width', (widths.end * 2.25).toFixed(3));
-      path.setAttribute('stroke', color);
-      path.setAttribute('fill', 'none');
-      path.setAttribute('stroke-linecap', 'round');
-
-      svg.appendChild(path);
-    }
-  }, function (rawPoint) {
-    var circle = document.createElement('circle');
-    var dotSize = typeof _this2.dotSize === 'function' ? _this2.dotSize() : _this2.dotSize;
-    circle.setAttribute('r', dotSize);
-    circle.setAttribute('cx', rawPoint.x);
-    circle.setAttribute('cy', rawPoint.y);
-    circle.setAttribute('fill', rawPoint.color);
-
-    svg.appendChild(circle);
-  });
-
-  var prefix = 'data:image/svg+xml;base64,';
-  var header = '<svg' + ' xmlns="http://www.w3.org/2000/svg"' + ' xmlns:xlink="http://www.w3.org/1999/xlink"' + (' viewBox="' + minX + ' ' + minY + ' ' + maxX + ' ' + maxY + '"') + (' width="' + maxX + '"') + (' height="' + maxY + '"') + '>';
-  var body = svg.innerHTML;
-
-  // IE hack for missing innerHTML property on SVGElement
-  if (body === undefined) {
-    var dummy = document.createElement('dummy');
-    var nodes = svg.childNodes;
-    dummy.innerHTML = '';
-
-    for (var i = 0; i < nodes.length; i += 1) {
-      dummy.appendChild(nodes[i].cloneNode(true));
-    }
-
-    body = dummy.innerHTML;
-  }
-
-  var footer = '</svg>';
-  var data = header + body + footer;
-
-  return prefix + btoa(data);
-};
-
-SignaturePad.prototype.fromData = function (pointGroups) {
-  var _this3 = this;
-
-  this.clear();
-
-  this._fromData(pointGroups, function (curve, widths) {
-    return _this3._drawCurve(curve, widths.start, widths.end);
-  }, function (rawPoint) {
-    return _this3._drawDot(rawPoint);
-  });
-
-  this._data = pointGroups;
-};
-
-SignaturePad.prototype.toData = function () {
-  return this._data;
-};
-
-return SignaturePad;
-
-})));
-
-},{}],424:[function(_dereq_,module,exports){
 "use strict";
 
 function hash(str) {
@@ -95866,9 +95254,9 @@ function hash(str) {
 
 module.exports = hash;
 
-},{}],425:[function(_dereq_,module,exports){
+},{}],424:[function(_dereq_,module,exports){
 !function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t():"function"==typeof define&&define.amd?define([],t):"object"==typeof exports?exports.textMaskAddons=t():e.textMaskAddons=t()}(this,function(){return function(e){function t(r){if(n[r])return n[r].exports;var i=n[r]={exports:{},id:r,loaded:!1};return e[r].call(i.exports,i,i.exports,t),i.loaded=!0,i.exports}var n={};return t.m=e,t.c=n,t.p="",t(0)}([function(e,t,n){"use strict";function r(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(t,"__esModule",{value:!0});var i=n(1);Object.defineProperty(t,"createAutoCorrectedDatePipe",{enumerable:!0,get:function(){return r(i).default}});var o=n(2);Object.defineProperty(t,"createNumberMask",{enumerable:!0,get:function(){return r(o).default}});var u=n(3);Object.defineProperty(t,"emailMask",{enumerable:!0,get:function(){return r(u).default}})},function(e,t){"use strict";function n(){var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:"mm dd yyyy",t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},n=t.minYear,o=void 0===n?1:n,u=t.maxYear,a=void 0===u?9999:u,c=e.split(/[^dmyHMS]+/).sort(function(e,t){return i.indexOf(e)-i.indexOf(t)});return function(t){var n=[],i={dd:31,mm:12,yy:99,yyyy:a,HH:23,MM:59,SS:59},u={dd:1,mm:1,yy:0,yyyy:o,HH:0,MM:0,SS:0},l=t.split("");c.forEach(function(t){var r=e.indexOf(t),o=parseInt(i[t].toString().substr(0,1),10);parseInt(l[r],10)>o&&(l[r+1]=l[r],l[r]=0,n.push(r))});var s=0,d=c.some(function(n){var c=e.indexOf(n),l=n.length,d=t.substr(c,l).replace(/\D/g,""),f=parseInt(d,10);"mm"===n&&(s=f||0);var p="dd"===n?r[s]:i[n];if("yyyy"===n&&(1!==o||9999!==a)){var v=parseInt(i[n].toString().substring(0,d.length),10),y=parseInt(u[n].toString().substring(0,d.length),10);return f<y||f>v}return f>p||d.length===l&&f<u[n]});return!d&&{value:l.join(""),indexesOfPipedChars:n}}}Object.defineProperty(t,"__esModule",{value:!0}),t.default=n;var r=[31,31,29,31,30,31,30,31,31,30,31,30,31],i=["yyyy","yy","mm","dd","HH","MM","SS"]},function(e,t){"use strict";function n(){function e(){var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:a,t=e.length;if(e===a||e[0]===g[0]&&1===t)return g.split(a).concat([v]).concat(h.split(a));if(e===P&&_)return g.split(a).concat(["0",P,v]).concat(h.split(a));var n=e[0]===s&&D;n&&(e=e.toString().substr(1));var u=e.lastIndexOf(P),c=u!==-1,l=void 0,m=void 0,b=void 0;if(e.slice($*-1)===h&&(e=e.slice(0,$*-1)),c&&(_||I)?(l=e.slice(e.slice(0,N)===g?N:0,u),m=e.slice(u+1,t),m=r(m.replace(f,a))):l=e.slice(0,N)===g?e.slice(N):e,L&&("undefined"==typeof L?"undefined":o(L))===p){var O="."===S?"[.]":""+S,M=(l.match(new RegExp(O,"g"))||[]).length;l=l.slice(0,L+M*V)}return l=l.replace(f,a),R||(l=l.replace(/^0+(0$|[^0])/,"$1")),l=x?i(l,S):l,b=r(l),(c&&_||I===!0)&&(e[u-1]!==P&&b.push(y),b.push(P,y),m&&(("undefined"==typeof C?"undefined":o(C))===p&&(m=m.slice(0,C)),b=b.concat(m)),I===!0&&e[u-1]===P&&b.push(v)),N>0&&(b=g.split(a).concat(b)),n&&(b.length===N&&b.push(v),b=[d].concat(b)),h.length>0&&(b=b.concat(h.split(a))),b}var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},n=t.prefix,g=void 0===n?u:n,m=t.suffix,h=void 0===m?a:m,b=t.includeThousandsSeparator,x=void 0===b||b,O=t.thousandsSeparatorSymbol,S=void 0===O?c:O,M=t.allowDecimal,_=void 0!==M&&M,j=t.decimalSymbol,P=void 0===j?l:j,w=t.decimalLimit,C=void 0===w?2:w,H=t.requireDecimal,I=void 0!==H&&H,k=t.allowNegative,D=void 0!==k&&k,E=t.allowLeadingZeroes,R=void 0!==E&&E,A=t.integerLimit,L=void 0===A?null:A,N=g&&g.length||0,$=h&&h.length||0,V=S&&S.length||0;return e.instanceOf="createNumberMask",e}function r(e){return e.split(a).map(function(e){return v.test(e)?v:e})}function i(e,t){return e.replace(/\B(?=(\d{3})+(?!\d))/g,t)}Object.defineProperty(t,"__esModule",{value:!0});var o="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e};t.default=n;var u="$",a="",c=",",l=".",s="-",d=/-/,f=/\D+/g,p="number",v=/\d/,y="[]"},function(e,t,n){"use strict";function r(e){return e&&e.__esModule?e:{default:e}}function i(e,t){e=e.replace(O,v);var n=t.placeholderChar,r=t.currentCaretPosition,i=e.indexOf(y),s=e.lastIndexOf(p),d=s<i?-1:s,f=o(e,i+1,y),g=o(e,d-1,p),m=u(e,i,n),h=a(e,i,d,n),b=c(e,d,n,r);m=l(m),h=l(h),b=l(b,!0);var x=m.concat(f).concat(h).concat(g).concat(b);return x}function o(e,t,n){var r=[];return e[t]===n?r.push(n):r.push(g,n),r.push(g),r}function u(e,t){return t===-1?e:e.slice(0,t)}function a(e,t,n,r){var i=v;return t!==-1&&(i=n===-1?e.slice(t+1,e.length):e.slice(t+1,n)),i=i.replace(new RegExp("[\\s"+r+"]",h),v),i===y?f:i.length<1?m:i[i.length-1]===p?i.slice(0,i.length-1):i}function c(e,t,n,r){var i=v;return t!==-1&&(i=e.slice(t+1,e.length)),i=i.replace(new RegExp("[\\s"+n+".]",h),v),0===i.length?e[t-1]===p&&r!==e.length?f:v:i}function l(e,t){return e.split(v).map(function(e){return e===m?e:t?x:b})}Object.defineProperty(t,"__esModule",{value:!0});var s=n(4),d=r(s),f="*",p=".",v="",y="@",g="[]",m=" ",h="g",b=/[^\s]/,x=/[^.\s]/,O=/\s/g;t.default={mask:i,pipe:d.default}},function(e,t){"use strict";function n(e,t){var n=t.currentCaretPosition,o=t.rawValue,f=t.previousConformedValue,p=t.placeholderChar,v=e;v=r(v);var y=v.indexOf(a),g=null===o.match(new RegExp("[^@\\s."+p+"]"));if(g)return u;if(v.indexOf(l)!==-1||y!==-1&&n!==y+1||o.indexOf(i)===-1&&f!==u&&o.indexOf(c)!==-1)return!1;var m=v.indexOf(i),h=v.slice(m+1,v.length);return(h.match(d)||s).length>1&&v.substr(-1)===c&&n!==o.length&&(v=v.slice(0,v.length-1)),v}function r(e){var t=0;return e.replace(o,function(){return t++,1===t?i:u})}Object.defineProperty(t,"__esModule",{value:!0}),t.default=n;var i="@",o=/@/g,u="",a="@.",c=".",l="..",s=[],d=/\./g}])});
-},{}],426:[function(_dereq_,module,exports){
+},{}],425:[function(_dereq_,module,exports){
 (function (setImmediate,clearImmediate){
 var nextTick = _dereq_('process/browser.js').nextTick;
 var apply = Function.prototype.apply;
@@ -95947,7 +95335,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
   delete immediateIds[id];
 };
 }).call(this,_dereq_("timers").setImmediate,_dereq_("timers").clearImmediate)
-},{"process/browser.js":421,"timers":426}],427:[function(_dereq_,module,exports){
+},{"process/browser.js":421,"timers":425}],426:[function(_dereq_,module,exports){
 /*!
  * ui-select
  * http://github.com/angular-ui/ui-select
@@ -98375,9 +97763,9 @@ $templateCache.put("selectize/match.tpl.html","<div ng-hide=\"$select.searchEnab
 $templateCache.put("selectize/no-choice.tpl.html","<div class=\"ui-select-no-choice selectize-dropdown\" ng-show=\"$select.items.length == 0\"><div class=\"selectize-dropdown-content\"><div data-selectable=\"\" ng-transclude=\"\"></div></div></div>");
 $templateCache.put("selectize/select-multiple.tpl.html","<div class=\"ui-select-container selectize-control multi plugin-remove_button\" ng-class=\"{\'open\': $select.open}\"><div class=\"selectize-input\" ng-class=\"{\'focus\': $select.open, \'disabled\': $select.disabled, \'selectize-focus\' : $select.focus}\" ng-click=\"$select.open && !$select.searchEnabled ? $select.toggle($event) : $select.activate()\"><div class=\"ui-select-match\"></div><input type=\"search\" autocomplete=\"off\" tabindex=\"-1\" class=\"ui-select-search\" ng-class=\"{\'ui-select-search-hidden\':!$select.searchEnabled}\" placeholder=\"{{$selectMultiple.getPlaceholder()}}\" ng-model=\"$select.search\" ng-disabled=\"$select.disabled\" aria-expanded=\"{{$select.open}}\" aria-label=\"{{ $select.baseTitle }}\" ondrop=\"return false;\"></div><div class=\"ui-select-choices\"></div><div class=\"ui-select-no-choice\"></div></div>");
 $templateCache.put("selectize/select.tpl.html","<div class=\"ui-select-container selectize-control single\" ng-class=\"{\'open\': $select.open}\"><div class=\"selectize-input\" ng-class=\"{\'focus\': $select.open, \'disabled\': $select.disabled, \'selectize-focus\' : $select.focus}\" ng-click=\"$select.open && !$select.searchEnabled ? $select.toggle($event) : $select.activate()\"><div class=\"ui-select-match\"></div><input type=\"search\" autocomplete=\"off\" tabindex=\"-1\" class=\"ui-select-search ui-select-toggle\" ng-class=\"{\'ui-select-search-hidden\':!$select.searchEnabled}\" ng-click=\"$select.toggle($event)\" placeholder=\"{{$select.placeholder}}\" ng-model=\"$select.search\" ng-hide=\"!$select.isEmpty() && !$select.open\" ng-disabled=\"$select.disabled\" aria-label=\"{{ $select.baseTitle }}\"></div><div class=\"ui-select-choices\"></div><div class=\"ui-select-no-choice\"></div></div>");}]);
-},{}],428:[function(_dereq_,module,exports){
+},{}],427:[function(_dereq_,module,exports){
 !function(e,r){"object"==typeof exports&&"object"==typeof module?module.exports=r():"function"==typeof define&&define.amd?define([],r):"object"==typeof exports?exports.vanillaTextMask=r():e.vanillaTextMask=r()}(this,function(){return function(e){function r(n){if(t[n])return t[n].exports;var o=t[n]={exports:{},id:n,loaded:!1};return e[n].call(o.exports,o,o.exports,r),o.loaded=!0,o.exports}var t={};return r.m=e,r.c=t,r.p="",r(0)}([function(e,r,t){"use strict";function n(e){return e&&e.__esModule?e:{default:e}}function o(e){var r=e.inputElement,t=(0,u.default)(e),n=function(e){var r=e.target.value;return t.update(r)};return r.addEventListener("input",n),t.update(r.value),{textMaskInputElement:t,destroy:function(){r.removeEventListener("input",n)}}}Object.defineProperty(r,"__esModule",{value:!0}),r.conformToMask=void 0,r.maskInput=o;var i=t(2);Object.defineProperty(r,"conformToMask",{enumerable:!0,get:function(){return n(i).default}});var a=t(5),u=n(a);r.default=o},function(e,r){"use strict";Object.defineProperty(r,"__esModule",{value:!0}),r.placeholderChar="_",r.strFunction="function"},function(e,r,t){"use strict";function n(){var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:l,r=arguments.length>1&&void 0!==arguments[1]?arguments[1]:u,t=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};if(!(0,i.isArray)(r)){if(("undefined"==typeof r?"undefined":o(r))!==a.strFunction)throw new Error("Text-mask:conformToMask; The mask property must be an array.");r=r(e,t),r=(0,i.processCaretTraps)(r).maskWithoutCaretTraps}var n=t.guide,s=void 0===n||n,f=t.previousConformedValue,d=void 0===f?l:f,c=t.placeholderChar,p=void 0===c?a.placeholderChar:c,v=t.placeholder,h=void 0===v?(0,i.convertMaskToPlaceholder)(r,p):v,m=t.currentCaretPosition,y=t.keepCharPositions,g=s===!1&&void 0!==d,b=e.length,C=d.length,k=h.length,x=r.length,P=b-C,T=P>0,O=m+(T?-P:0),M=O+Math.abs(P);if(y===!0&&!T){for(var w=l,S=O;S<M;S++)h[S]===p&&(w+=p);e=e.slice(0,O)+w+e.slice(O,b)}for(var _=e.split(l).map(function(e,r){return{char:e,isNew:r>=O&&r<M}}),j=b-1;j>=0;j--){var V=_[j].char;if(V!==p){var A=j>=O&&C===x;V===h[A?j-P:j]&&_.splice(j,1)}}var E=l,N=!1;e:for(var F=0;F<k;F++){var I=h[F];if(I===p){if(_.length>0)for(;_.length>0;){var L=_.shift(),R=L.char,J=L.isNew;if(R===p&&g!==!0){E+=p;continue e}if(r[F].test(R)){if(y===!0&&J!==!1&&d!==l&&s!==!1&&T){for(var W=_.length,q=null,z=0;z<W;z++){var B=_[z];if(B.char!==p&&B.isNew===!1)break;if(B.char===p){q=z;break}}null!==q?(E+=R,_.splice(q,1)):F--}else E+=R;continue e}N=!0}g===!1&&(E+=h.substr(F,k));break}E+=I}if(g&&T===!1){for(var D=null,G=0;G<E.length;G++)h[G]===p&&(D=G);E=null!==D?E.substr(0,D+1):l}return{conformedValue:E,meta:{someCharsRejected:N}}}Object.defineProperty(r,"__esModule",{value:!0});var o="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e};r.default=n;var i=t(3),a=t(1),u=[],l=""},function(e,r,t){"use strict";function n(){var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:s,r=arguments.length>1&&void 0!==arguments[1]?arguments[1]:l.placeholderChar;if(!o(e))throw new Error("Text-mask:convertMaskToPlaceholder; The mask property must be an array.");if(e.indexOf(r)!==-1)throw new Error("Placeholder character must not be used as part of the mask. Please specify a character that is not present in your mask as your placeholder character.\n\n"+("The placeholder character that was received is: "+JSON.stringify(r)+"\n\n")+("The mask that was received is: "+JSON.stringify(e)));return e.map(function(e){return e instanceof RegExp?r:e}).join("")}function o(e){return Array.isArray&&Array.isArray(e)||e instanceof Array}function i(e){return"string"==typeof e||e instanceof String}function a(e){return"number"==typeof e&&void 0===e.length&&!isNaN(e)}function u(e){for(var r=[],t=void 0;t=e.indexOf(f),t!==-1;)r.push(t),e.splice(t,1);return{maskWithoutCaretTraps:e,indexes:r}}Object.defineProperty(r,"__esModule",{value:!0}),r.convertMaskToPlaceholder=n,r.isArray=o,r.isString=i,r.isNumber=a,r.processCaretTraps=u;var l=t(1),s=[],f="[]"},function(e,r){"use strict";function t(e){var r=e.previousConformedValue,t=void 0===r?o:r,i=e.previousPlaceholder,a=void 0===i?o:i,u=e.currentCaretPosition,l=void 0===u?0:u,s=e.conformedValue,f=e.rawValue,d=e.placeholderChar,c=e.placeholder,p=e.indexesOfPipedChars,v=void 0===p?n:p,h=e.caretTrapIndexes,m=void 0===h?n:h;if(0===l||!f.length)return 0;var y=f.length,g=t.length,b=c.length,C=s.length,k=y-g,x=k>0,P=0===g,T=k>1&&!x&&!P;if(T)return l;var O=x&&(t===s||s===c),M=0,w=void 0,S=void 0;if(O)M=l-k;else{var _=s.toLowerCase(),j=f.toLowerCase(),V=j.substr(0,l).split(o),A=V.filter(function(e){return _.indexOf(e)!==-1});S=A[A.length-1];var E=a.substr(0,A.length).split(o).filter(function(e){return e!==d}).length,N=c.substr(0,A.length).split(o).filter(function(e){return e!==d}).length,F=N!==E,I=void 0!==a[A.length-1]&&void 0!==c[A.length-2]&&a[A.length-1]!==d&&a[A.length-1]!==c[A.length-1]&&a[A.length-1]===c[A.length-2];!x&&(F||I)&&E>0&&c.indexOf(S)>-1&&void 0!==f[l]&&(w=!0,S=f[l]);for(var L=v.map(function(e){return _[e]}),R=L.filter(function(e){return e===S}).length,J=A.filter(function(e){return e===S}).length,W=c.substr(0,c.indexOf(d)).split(o).filter(function(e,r){return e===S&&f[r]!==e}).length,q=W+J+R+(w?1:0),z=0,B=0;B<C;B++){var D=_[B];if(M=B+1,D===S&&z++,z>=q)break}}if(x){for(var G=M,H=M;H<=b;H++)if(c[H]===d&&(G=H),c[H]===d||m.indexOf(H)!==-1||H===b)return G}else if(w){for(var K=M-1;K>=0;K--)if(s[K]===S||m.indexOf(K)!==-1||0===K)return K}else for(var Q=M;Q>=0;Q--)if(c[Q-1]===d||m.indexOf(Q)!==-1||0===Q)return Q}Object.defineProperty(r,"__esModule",{value:!0}),r.default=t;var n=[],o=""},function(e,r,t){"use strict";function n(e){return e&&e.__esModule?e:{default:e}}function o(e){var r={previousConformedValue:void 0,previousPlaceholder:void 0};return{state:r,update:function(t){var n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:e,o=n.inputElement,s=n.mask,d=n.guide,m=n.pipe,g=n.placeholderChar,b=void 0===g?v.placeholderChar:g,C=n.keepCharPositions,k=void 0!==C&&C,x=n.showMask,P=void 0!==x&&x;if("undefined"==typeof t&&(t=o.value),t!==r.previousConformedValue){("undefined"==typeof s?"undefined":l(s))===y&&void 0!==s.pipe&&void 0!==s.mask&&(m=s.pipe,s=s.mask);var T=void 0,O=void 0;if(s instanceof Array&&(T=(0,p.convertMaskToPlaceholder)(s,b)),s!==!1){var M=a(t),w=o.selectionEnd,S=r.previousConformedValue,_=r.previousPlaceholder,j=void 0;if(("undefined"==typeof s?"undefined":l(s))===v.strFunction){if(O=s(M,{currentCaretPosition:w,previousConformedValue:S,placeholderChar:b}),O===!1)return;var V=(0,p.processCaretTraps)(O),A=V.maskWithoutCaretTraps,E=V.indexes;O=A,j=E,T=(0,p.convertMaskToPlaceholder)(O,b)}else O=s;var N={previousConformedValue:S,guide:d,placeholderChar:b,pipe:m,placeholder:T,currentCaretPosition:w,keepCharPositions:k},F=(0,c.default)(M,O,N),I=F.conformedValue,L=("undefined"==typeof m?"undefined":l(m))===v.strFunction,R={};L&&(R=m(I,u({rawValue:M},N)),R===!1?R={value:S,rejected:!0}:(0,p.isString)(R)&&(R={value:R}));var J=L?R.value:I,W=(0,f.default)({previousConformedValue:S,previousPlaceholder:_,conformedValue:J,placeholder:T,rawValue:M,currentCaretPosition:w,placeholderChar:b,indexesOfPipedChars:R.indexesOfPipedChars,caretTrapIndexes:j}),q=J===T&&0===W,z=P?T:h,B=q?z:J;r.previousConformedValue=B,r.previousPlaceholder=T,o.value!==B&&(o.value=B,i(o,W))}}}}}function i(e,r){document.activeElement===e&&(g?b(function(){return e.setSelectionRange(r,r,m)},0):e.setSelectionRange(r,r,m))}function a(e){if((0,p.isString)(e))return e;if((0,p.isNumber)(e))return String(e);if(void 0===e||null===e)return h;throw new Error("The 'value' provided to Text Mask needs to be a string or a number. The value received was:\n\n "+JSON.stringify(e))}Object.defineProperty(r,"__esModule",{value:!0});var u=Object.assign||function(e){for(var r=1;r<arguments.length;r++){var t=arguments[r];for(var n in t)Object.prototype.hasOwnProperty.call(t,n)&&(e[n]=t[n])}return e},l="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e};r.default=o;var s=t(4),f=n(s),d=t(2),c=n(d),p=t(3),v=t(1),h="",m="none",y="object",g="undefined"!=typeof navigator&&/Android/i.test(navigator.userAgent),b="undefined"!=typeof requestAnimationFrame?requestAnimationFrame:setTimeout}])});
-},{}],429:[function(_dereq_,module,exports){
+},{}],428:[function(_dereq_,module,exports){
 "use strict";
 
 module.exports = function(app) {
@@ -98485,7 +97873,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],430:[function(_dereq_,module,exports){
+},{}],429:[function(_dereq_,module,exports){
 "use strict";
 
 var _merge = _dereq_('lodash/merge');
@@ -98726,7 +98114,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"lodash/merge":401}],431:[function(_dereq_,module,exports){
+},{"lodash/merge":401}],430:[function(_dereq_,module,exports){
 "use strict";
 
 module.exports = function(app) {
@@ -98810,7 +98198,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],432:[function(_dereq_,module,exports){
+},{}],431:[function(_dereq_,module,exports){
 "use strict";
 
 var GridUtils = _dereq_('../factories/GridUtils')();
@@ -98904,7 +98292,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":488}],433:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":479}],432:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function(app) {
   app.provider('formioComponents', function() {
@@ -98976,7 +98364,7 @@ module.exports = function(app) {
   }]);
 };
 
-},{}],434:[function(_dereq_,module,exports){
+},{}],433:[function(_dereq_,module,exports){
 "use strict";
 
 var GridUtils = _dereq_('../factories/GridUtils')();
@@ -99048,7 +98436,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":488}],435:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":479}],434:[function(_dereq_,module,exports){
 "use strict";
 
 module.exports = function(app) {
@@ -99077,7 +98465,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],436:[function(_dereq_,module,exports){
+},{}],435:[function(_dereq_,module,exports){
 "use strict";
 
 var createNumberMask = _dereq_('text-mask-addons').createNumberMask;
@@ -99165,172 +98553,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"lodash/get":369,"lodash/isNil":386,"text-mask-addons":425}],437:[function(_dereq_,module,exports){
-"use strict";
-
-var GridUtils = _dereq_('../factories/GridUtils')();
-
-module.exports = function(app) {
-  app.config([
-    'formioComponentsProvider',
-    function(formioComponentsProvider) {
-      formioComponentsProvider.register('custom', {
-        title: 'Custom',
-        template: 'formio/components/custom.html',
-        group: 'advanced',
-        settings: {},
-        tableView: GridUtils.generic
-      });
-    }
-  ]);
-  app.run([
-    '$templateCache',
-    function($templateCache) {
-      $templateCache.put('formio/components/custom.html',
-        "<div class=\"panel panel-default\">\n  <div class=\"panel-body text-muted text-center\">\n    Custom Component ({{ component.type }})\n  </div>\n</div>\n"
-      );
-    }
-  ]);
-};
-
-},{"../factories/GridUtils":488}],438:[function(_dereq_,module,exports){
-"use strict";
-
-var formioUtils = _dereq_('formiojs/utils').default;
-
-module.exports = function(app) {
-  app.config([
-    'formioComponentsProvider',
-    function(formioComponentsProvider) {
-      formioComponentsProvider.register('datagrid', {
-        title: 'Data Grid',
-        template: 'formio/components/datagrid.html',
-        group: 'advanced',
-        tableView: function(data, options) {
-          var view = '<table class="table table-striped table-bordered table-child">';
-
-          if (!options.tableChild) {
-            view += '<thead><tr>';
-            angular.forEach(options.component.components, function(component) {
-              view += '<th>' + (component.label || '( '+component.key+')')+'</th>';
-            });
-            view += '</tr></thead>';
-          }
-
-          view += '<tbody>';
-          angular.forEach(data, function(row) {
-            view += '<tr>';
-            formioUtils.eachComponent(options.component.components, function(component) {
-              // If the component has a defined tableView, use that, otherwise try and use the raw data as a string.
-              var info = options.componentInfo.components.hasOwnProperty(component.type)
-                ? options.componentInfo.components[component.type]
-                : {};
-              if (info.tableView) {
-                // Reset the tableChild value for datagrids, so that components have headers.
-                view += '<td>' + info.tableView((row && row[component.key]) || '', {
-                  component: component,
-                  $interpolate: options.$interpolate,
-                  componentInfo: options.componentInfo,
-                  tableChild: false,
-                  util: options.util
-                }) + '</td>';
-              }
-              else {
-                view += '<td>';
-                if (component.prefix) {
-                  view += component.prefix;
-                }
-                view += (row && row[component.key]) || '';
-                if (component.suffix) {
-                  view += ' ' + component.suffix;
-                }
-                view += '</td>';
-              }
-            });
-            view += '</tr>';
-          });
-          view += '</tbody></table>';
-          return view;
-        },
-        settings: {
-          autofocus: false,
-          input: true,
-          tree: true,
-          components: [],
-          tableView: true,
-          label: 'Data Grid',
-          key: 'datagrid',
-          protected: false,
-          persistent: true,
-          hidden: false,
-          clearOnHide: true
-        }
-      });
-    }
-  ]);
-  app.controller('formioDataGrid', [
-    '$scope',
-    'FormioUtils',
-    function($scope, FormioUtils) {
-      if ($scope.options && $scope.options.building) return;
-      // Ensure each data grid has a valid data model.
-      $scope.data = $scope.data || {};
-      $scope.data[$scope.component.key] = $scope.data[$scope.component.key] || [{}];
-
-      // Determine if any component is visible.
-      $scope.anyVisible = function(component) {
-        var data = $scope.data[$scope.component.key];
-        var visible = false;
-        angular.forEach(data, function(rowData) {
-          visible = (visible || FormioUtils.isVisible(component, rowData, $scope.data, $scope.hideComponents));
-        });
-        return visible;
-      };
-
-      // Pull out the rows and cols for easy iteration.
-      $scope.rows = $scope.data[$scope.component.key];
-      // If less than minLength, add that many rows.
-      if ($scope.component.validate && $scope.component.validate.hasOwnProperty('minLength') && $scope.rows.length < $scope.component.validate.minLength) {
-        var toAdd = $scope.component.validate.minLength - $scope.rows.length;
-        for (var i = 0; i < toAdd; i++) {
-          $scope.rows.push({});
-        }
-      }
-      // If more than maxLength, remove extra rows.
-      if ($scope.component.validate && $scope.component.validate.hasOwnProperty('maxLength') && $scope.rows.length > $scope.component.validate.maxLength) {
-        $scope.rows.splice($scope.component.validate.maxLength);
-      }
-      $scope.cols = $scope.component.components;
-      $scope.localKeys = $scope.component.components.map(function(component) {
-        return component.key;
-      });
-
-      // Add a row the to grid.
-      $scope.addRow = function() {
-        if (!Array.isArray($scope.rows)) {
-          $scope.rows = [];
-        }
-        $scope.rows.push({});
-      };
-
-      // Remove a row from the grid.
-      $scope.removeRow = function(index) {
-        $scope.rows.splice(index, 1);
-      };
-    }
-  ]);
-  app.run([
-    '$templateCache',
-    'FormioUtils',
-    function($templateCache, FormioUtils) {
-      $templateCache.put('formio/components/datagrid.html', FormioUtils.fieldWrap(
-        "<div name=\"{{ component.key }}\" class=\"formio-data-grid\" ng-model=\"data[component.key]\" ng-model-options=\"{allowInvalid: true}\" custom-validator=\"component.validate.custom\" ng-controller=\"formioDataGrid\">\n  <table ng-class=\"{'table-striped': component.striped, 'table-bordered': component.bordered, 'table-hover': component.hover, 'table-condensed': component.condensed}\" class=\"table datagrid-table\">\n    <thead>\n      <tr>\n        <th\n          ng-repeat=\"col in cols track by $index\"\n          ng-class=\"{'field-required': col.validate.required}\"\n          ng-if=\"options.building ? '::true' : anyVisible(col)\"\n        ><span ng-if=\"!col.dataGridLabel && (col.input || !col.hideLabel)\">{{ col.label | formioTranslate:null:options.building }}</span></th>\n        <th style=\"padding-left: 9px;\">\n          <div style=\"padding: 0; margin-bottom: 0;\" class=\"datagrid-add\" ng-if=\"(!component.hasOwnProperty('validate') || !component.validate.hasOwnProperty('maxLength') || rows.length < component.validate.maxLength) && (component.addAnotherPosition === 'top' || component.addAnotherPosition === 'both')\">\n            <a ng-click=\"(readOnly || formioForm.submitting)? null: addRow() \" ng-disabled = \"readOnly || formioForm.submitting\" class=\"btn btn-primary\">\n              <span class=\"glyphicon glyphicon-plus\" aria-hidden=\"true\"></span> {{ \"\" | formioTranslate:null:options.building }}\n            </a>\n          </div>\n        </th>\n      </tr>\n    </thead>\n    <tbody>\n      <tr ng-repeat=\"row in rows track by $index\" ng-init=\"rowIndex = $index\">\n        <td ng-repeat=\"col in cols track by $index\" ng-init=\"col.inDataGrid = true; colIndex = $index\" class=\"formio-data-grid-row\" ng-if=\"options.building ? '::true' : anyVisible(col)\">\n          <formio-component\n            component=\"col\"\n            data=\"rows[rowIndex]\"\n            form-name=\"formName\"\n            formio=\"formio\"\n            submission=\"submission\"\n            hide-components=\"hideComponents\"\n            ng-if=\"options.building ? '::true' : isVisible(col, row)\"\n            read-only=\"isDisabled(col, row)\"\n            grid-row=\"rowIndex\"\n            grid-col=\"colIndex\"\n            options=\"options\"\n          ></formio-component>\n        </td>\n        <td ng-if=\"!component.hasOwnProperty('validate') || !component.validate.hasOwnProperty('minLength') || rows.length > component.validate.minLength\">\n          <a ng-click=\"(readOnly || formioForm.submitting)? null: removeRow(rowIndex) \" ng-disabled = \"readOnly || formioForm.submitting\" class=\"btn btn-default datagrid-remove\">\n            <span class=\"glyphicon glyphicon-remove-circle\"></span>\n          </a>\n        </td>\n      </tr>\n    </tbody>\n  </table>\n  <div style=\"margin-top: 10px\" class=\"datagrid-add\" ng-if=\"(!component.hasOwnProperty('validate') || !component.validate.hasOwnProperty('maxLength') || !component.validate.maxLength || rows.length < component.validate.maxLength) && (!component.addAnotherPosition || component.addAnotherPosition === 'bottom' || component.addAnotherPosition === 'both')\">\n    <a ng-click=\"(readOnly || formioForm.submitting)? null: addRow() \" ng-disabled = \"readOnly || formioForm.submitting\" class=\"btn btn-primary\">\n      <span class=\"glyphicon glyphicon-plus\" aria-hidden=\"true\"></span> {{ component.addAnother || \"Add Another\" | formioTranslate:null:options.building }}\n    </a>\n  </div>\n</div>\n\n\n"
-      ));
-    }
-  ]);
-};
-
-},{"formiojs/utils":188}],439:[function(_dereq_,module,exports){
+},{"lodash/get":369,"lodash/isNil":386,"text-mask-addons":424}],436:[function(_dereq_,module,exports){
 "use strict";
 
 var _get = _dereq_('lodash/get');
@@ -99454,7 +98677,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"lodash/get":369}],440:[function(_dereq_,module,exports){
+},{"lodash/get":369}],437:[function(_dereq_,module,exports){
 "use strict";
 
 var _get = _dereq_('lodash/get');
@@ -99741,433 +98964,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"lodash/get":369,"lodash/trimEnd":414}],441:[function(_dereq_,module,exports){
-"use strict";
-
-var formioUtils = _dereq_('formiojs/utils').default;
-
-module.exports = function(app) {
-  app.config([
-    'formioComponentsProvider',
-    function(formioComponentsProvider) {
-      formioComponentsProvider.register('editgrid', {
-        title: 'Edit Grid',
-        template: 'formio/components/editgrid.html',
-        group: 'advanced',
-        tableView: function(data, options) {
-          var view = '<table class="table table-striped table-bordered table-child">';
-
-          if (!options.tableChild) {
-            view += '<thead><tr>';
-            angular.forEach(options.component.components, function(component) {
-              view += '<th>' + (component.label || '') + ' (' + component.key + ')</th>';
-            });
-            view += '</tr></thead>';
-          }
-
-          view += '<tbody>';
-          angular.forEach(data, function(row) {
-            view += '<tr>';
-            formioUtils.eachComponent(options.component.components, function(component) {
-              // Don't render disabled fields, or fields with undefined data.
-              if (!component.tableView || !row || row[component.key] === undefined) {
-                return;
-              }
-
-              // If the component has a defined tableView, use that, otherwise try and use the raw data as a string.
-              var info = options.componentInfo.components.hasOwnProperty(component.type)
-                ? options.componentInfo.components[component.type]
-                : {};
-              if (info.tableView) {
-                // Reset the tableChild value for datagrids, so that components have headers.
-                view += '<td>' + info.tableView((row && row[component.key]) || '', {
-                  component: component,
-                  $interpolate: options.$interpolate,
-                  componentInfo: options.componentInfo,
-                  tableChild: false,
-                  util: options.util
-                }) + '</td>';
-              }
-              else {
-                view += '<td>';
-                if (component.prefix) {
-                  view += component.prefix;
-                }
-                view += (row && row[component.key]) || '';
-                if (component.suffix) {
-                  view += ' ' + component.suffix;
-                }
-                view += '</td>';
-              }
-            });
-            view += '</tr>';
-          });
-          view += '</tbody></table>';
-          return view;
-        },
-        settings: {
-          input: true,
-          tree: true,
-          components: [],
-          multiple: false,
-          tableView: true,
-          label: 'Edit Grid',
-          key: 'editgrid',
-          protected: false,
-          persistent: true,
-          hidden: false,
-          clearOnHide: true,
-          templates: {
-            header: '' +
-              '<div class="row"> \n' +
-              '  {%util.eachComponent(components, function(component) { %} \n' +
-              '    <div class="col-sm-2"> \n' +
-              '      {{ component.label }} \n' +
-              '    </div> \n' +
-              '  {% }) %} \n' +
-              '</div>',
-            row: '' +
-              '<div class="row"> \n' +
-              '  {%util.eachComponent(components, function(component) { %} \n' +
-              '    <div class="col-sm-2"> \n' +
-              '      {{ getView(component, row[component.key]) }} \n' +
-              '    </div> \n' +
-              '  {% }) %} \n' +
-              '  <div class="col-sm-2"> \n' +
-              '    <div class="btn-group pull-right"> \n' +
-              '      <div class="btn btn-default editRow">Edit</div> \n' +
-              '      <div class="btn btn-danger removeRow">Delete</div> \n' +
-              '    </div> \n' +
-              '  </div> \n' +
-              '</div>',
-            footer: ''
-          }
-        }
-      });
-    }
-  ]);
-  app.directive('editgridValidation', function() {
-    return {
-      require: 'ngModel',
-      restrict: 'A',
-      link: function(scope, elem, attr, ctrl) {
-        if (scope.options && scope.options.building || !scope.formioForm) return;
-
-        // Add the control to the main form.
-        scope.formioForm.$addControl(ctrl);
-
-        ctrl.$validators.editgrid = function(modelValue, viewValue) {
-          if (scope.openRows && scope.openRows.length) {
-            return false;
-          }
-          return true;
-        };
-      }
-    }
-  });
-  app.directive('editgridRowValidation', function() {
-    return {
-      require: 'ngModel',
-      restrict: 'A',
-      link: function(scope, elem, attr, ctrl) {
-        if (scope.options && scope.options.building) return;
-
-        // Add the control to the main form.
-        scope.formioForm.$addControl(ctrl);
-
-        var _get = function(item, path, def) {
-          if (!item) {
-            return def || undefined;
-          }
-          if (!path) {
-            return item;
-          }
-
-          // If the path is a string, turn it into an array.
-          if (typeof path === 'string') {
-            path = path.split('.');
-          }
-          // If the path is an array, take the first element, and recurse its path
-          if (path instanceof Array) {
-            var current = path.shift();
-            if (item.hasOwnProperty(current)) {
-              // If there are no more path items, stop here.
-              if (path.length === 0) {
-                return item[current];
-              }
-
-              return _get(item[current], path);
-            }
-
-            return undefined;
-          }
-
-          return undefined;
-        };
-
-        ctrl.$validators.editgridrow = function(modelValue, viewValue) {
-          var valid = true;
-          /*eslint-disable no-unused-vars */
-          if (scope.component.validate && scope.component.validate.row) {
-            var input = modelValue || viewValue;
-
-            // FOR-255 - Enable row data and form data to be visible in the validator.
-            var data = scope.submission.data;
-            var row = scope.row;
-            /*eslint-enable no-unused-vars */
-
-            var component = scope.component;
-            var custom = scope.component.validate.row;
-            custom = custom.replace(/({{\s{0,}(.*[^\s]){1}\s{0,}}})/g, function(match, $1, $2) {
-              return _get(scope.submission.data, $2);
-            });
-
-            try {
-              /* jshint evil: true */
-              eval(custom);
-            }
-            catch (err) {
-              valid = err.message;
-            }
-
-            if (valid !== true) {
-              return false;
-            }
-          }
-
-          return true;
-        };
-      }
-    }
-  });
-  app.directive('renderTemplate', function() {
-    return {
-      restrict: 'E',
-      replace: true,
-      scope: {
-        template: '=',
-        data: '=',
-        actions: '='
-      },
-      link: function(scope, element, attrs) {
-        scope.$watch('data', function() {
-          // Render template and set in element's innerHTML.
-          element.html(formioUtils.interpolate(scope.template, scope.data));
-          // Add actions to child elements with classes.
-          if (scope.actions && scope.actions.length) {
-            scope.actions.forEach(function(action) {
-              var elements = element.find('.' + action.class);
-              elements.each(function(index, element) {
-                element.addEventListener(action.event, action.action);
-              });
-            });
-          }
-        })
-      }
-    }
-  });
-  app.directive('editGridRow', function() {
-    return {
-      restict: 'E',
-      require: 'ngModel',
-      scope: false,
-      controller: [
-        '$scope',
-        '$interpolate',
-        'formioComponents',
-        'FormioUtils',
-        function(
-          $scope,
-          $interpolate,
-          formioComponents,
-          FormioUtils
-        ) {
-          $scope.$watchCollection('rows', function() {
-            $scope.rowData = angular.copy($scope.rows[$scope.rowIndex]);
-            $scope.templateData = {
-              data: $scope.submission.data,
-              row: $scope.rowData,
-              rowIndex: $scope.rowIndex,
-              components: $scope.component.components,
-              getView: function(component, data) {
-                var info = formioComponents.components[component.type] || {};
-                if (info.tableView) {
-                  return info.tableView(data || '', {
-                    component: component,
-                    $interpolate: $interpolate,
-                    componentInfo: formioComponents,
-                    tableChild: false,
-                    util: FormioUtils
-                  });
-                }
-                else {
-                  var view = '';
-
-                  if (component.prefix) {
-                    view += component.prefix;
-                  }
-                  view += data || '';
-                  if (component.suffix) {
-                    view += ' ' + component.suffix;
-                  }
-
-                  return view;
-                }
-              },
-              util: formioUtils
-            };
-          });
-          $scope.editDone = function(form) {
-            if (!form.$valid) {
-              form.$setDirty(true);
-              for (var key in form) {
-                if (form[key] && form[key].hasOwnProperty('$pristine')) {
-                  form[key].$setDirty(true);
-                }
-                if (form[key] && form[key].$validate) {
-                  form[key].$validate();
-                }
-              }
-              return;
-            }
-            $scope.rows[$scope.rowIndex] = $scope.rowData;
-            $scope.openRows.splice($scope.openRows.indexOf($scope.rowIndex), 1);
-            $scope.formioForm[$scope.componentId].$validate();
-          }
-
-          var editRow = function() {
-            $scope.openRows.push($scope.rowIndex);
-            $scope.$apply();
-          }
-          var removeRow = function() {
-            $scope.removeRow($scope.rowIndex);
-            $scope.$apply();
-          }
-          $scope.actions = [
-            {
-              class: 'removeRow',
-              event: 'click',
-              action: removeRow
-            },
-            {
-              class: 'editRow',
-              event: 'click',
-              action: editRow
-            }
-          ]
-        }
-      ],
-      template: '' +
-      '<div ng-if="openRows.indexOf(rowIndex) !== -1">' +
-      '  <div class="edit-body {{component.rowClass}}">' +
-      '    <div class="editgrid-edit">' +
-      '      <div class="editgrid-body">' +
-      '        <ng-form name="formioForm">' +
-      '          <formio-component' +
-      '            ng-repeat="col in component.components track by $index"' +
-      '            ng-init="colIndex = $index"' +
-      '            component="col"' +
-      '            data="rowData"' +
-      '            formio="formio"' +
-      '            submission="submission"' +
-      '            hide-components="hideComponents"' +
-      '            ng-if="options.building ? \'::true\' : isVisible(col, rowData)"' +
-      '            form-name="formName"' +
-      '            read-only="isDisabled(col, rowData)"' +
-      '            grid-row="rowIndex"' +
-      '            grid-col="colIndex"' +
-      '            options="options"' +
-      '          />' +
-      '        </ng-form>' +
-      '        <div class="editgrid-actions">' +
-      '          <div ng-click="editDone(formioForm)" class="btn btn-primary">{{ component.saveRow || \'Save\' }}</div>' +
-      '          <div ng-if="component.removeRow" ng-click="removeRow(rowIndex)" class="btn btn-danger">{{component.removeRow || \'Cancel\' }}</div>' +
-      '        </div> ' +
-      '      </div>' +
-      '    </div>' +
-      '  </div>' +
-      '</div>' +
-      '<div ng-if="openRows.indexOf(rowIndex) === -1">' +
-      '  <render-template template="component.templates.row" data="templateData" actions="actions"/>' +
-      '</div>'
-    }
-  });
-  app.controller('formioEditGrid', [
-    '$scope',
-    'FormioUtils',
-    function($scope, FormioUtils) {
-      if ($scope.options && $scope.options.building) return;
-      // Ensure each data grid has a valid data model.
-      $scope.data = $scope.data || {};
-      $scope.data[$scope.component.key] = $scope.data[$scope.component.key] || [];
-      $scope.$watch('data.' + $scope.component.key, function() {
-        $scope.headerData = {
-          components: $scope.cols,
-          value: $scope.data[$scope.component.key],
-          util: formioUtils,
-          data: $scope.data
-        };
-      }, true);
-
-      $scope.openRows = [];
-
-      // Determine if any component is visible.
-      $scope.anyVisible = function(component) {
-        var data = $scope.data[$scope.component.key];
-        var visible = false;
-        angular.forEach(data, function(rowData) {
-          visible = (visible || FormioUtils.isVisible(component, rowData, $scope.data, $scope.hideComponents));
-        });
-        return visible;
-      };
-
-      // Pull out the rows and cols for easy iteration.
-      $scope.rows = $scope.data[$scope.component.key];
-      // If less than minLength, add that many rows.
-      if ($scope.component.validate && $scope.component.validate.hasOwnProperty('minLength') && $scope.rows.length < $scope.component.validate.minLength) {
-        var toAdd = $scope.component.validate.minLength - $scope.rows.length;
-        for (var i = 0; i < toAdd; i++) {
-          $scope.rows.push({});
-        }
-      }
-      // If more than maxLength, remove extra rows.
-      if ($scope.component.validate && $scope.component.validate.hasOwnProperty('maxLength') && $scope.rows.length < $scope.component.validate.maxLength) {
-        $scope.rows = $scope.rows.slice(0, $scope.component.validate.maxLength);
-      }
-      $scope.cols = $scope.component.components;
-      $scope.localKeys = $scope.component.components.map(function(component) {
-        return component.key;
-      });
-
-      // Add a row the to grid.
-      $scope.addRow = function() {
-        if (!Array.isArray($scope.rows)) {
-          $scope.rows = [];
-        }
-        $scope.openRows.push($scope.rows.length);
-        $scope.rows.push({});
-      };
-
-      // Remove a row from the grid.
-      $scope.removeRow = function(index) {
-        // Make sure to close if it is open.
-        if ($scope.openRows.indexOf(index) !== -1) {
-          $scope.openRows.splice($scope.openRows.indexOf(index), 1);
-        }
-        $scope.rows.splice(index, 1);
-      };
-    }
-  ]);
-  app.run([
-    '$templateCache',
-    'FormioUtils',
-    function($templateCache, FormioUtils) {
-      $templateCache.put('formio/components/editgrid.html', "<div name=\"{{ componentId }}\" ng-model=\"data[component.key]\" ng-model-options=\"{allowInvalid: true}\" custom-validator=\"component.validate.custom\" editgrid-validation ng-controller=\"formioEditGrid\">\n  <label ng-if=\"labelVisible()\" for=\"{{ component.key }}\" class=\"control-label\" ng-class=\"{'field-required': isRequired(component)}\">\n    {{ component.label | formioTranslate:null:options.building }}\n    <formio-component-tooltip></formio-component-tooltip>\n  </label>\n  <div class=\"formio-data-grid\" id=\"formio-editgrid-{{ component.key }}\">\n    <ul class=\"list-group\">\n      <li ng-if=\"component.templates.header\" class=\"list-group-item list-group-header\">\n        <render-template template=\"component.templates.header\" data=\"headerData\" />\n      </li>\n      <li class=\"list-group-item\" ng-repeat=\"row in rows track by $index\" ng-init=\"rowIndex = $index\">\n        <div name=\"{{ componentId }}-row-{{ $index }}\" ng-model=\"row\" ng-model-options=\"{allowInvalid: true}\" editgrid-row-validation>\n          <edit-grid-row />\n          <p class=\"help-block\" ng-show=\"openRows.indexOf($index) !== -1 && formioForm.$error.editgrid\">{{ 'Please save all rows before proceeding' | formioTranslate }}.</p>\n          <p class=\"help-block\" ng-show=\"formioForm[componentId + '-row-' + $index].$error.editgridrow\">{{ 'Please correct rows before proceeding' | formioTranslate }}.</p>\n        </div>\n      </li>\n      <li ng-if=\"component.templates.footer\" class=\"list-group-item list-group-footer\">\n        <render-template template=\"component.templates.footer\" data=\"headerData\" />\n      </li>\n    </ul>\n    <div class=\"datagrid-add\" ng-if=\"!component.hasOwnProperty('validate') || !component.validate.hasOwnProperty('maxLength') || rows.length < component.validate.maxLength\">\n      <a ng-click=\"addRow()\" class=\"btn btn-primary\">\n        <span class=\"glyphicon glyphicon-plus\" aria-hidden=\"true\"></span> {{ component.addAnother || \"Add Another\" | formioTranslate:null:options.building }}\n      </a>\n    </div>\n  </div>\n  <formio-errors ng-if=\"::!options.building\"></formio-errors>\n</div>\n");
-    }
-  ]);
-};
-
-},{"formiojs/utils":188}],442:[function(_dereq_,module,exports){
+},{"lodash/get":369,"lodash/trimEnd":414}],438:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function(app) {
   app.config([
@@ -100202,7 +98999,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],443:[function(_dereq_,module,exports){
+},{}],439:[function(_dereq_,module,exports){
 "use strict";
 
 var GridUtils = _dereq_('../factories/GridUtils')();
@@ -100264,581 +99061,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":488}],444:[function(_dereq_,module,exports){
-"use strict";
-
-module.exports = function(app) {
-  app.config([
-    'formioComponentsProvider',
-    function(formioComponentsProvider) {
-      formioComponentsProvider.register('file', {
-        title: 'File',
-        template: 'formio/components/file.html',
-        group: 'advanced',
-        tableView: function(data, options) {
-          if (!data || data.length === 0) {
-            return '';
-          }
-
-          data = options.component.multiple ? data : data[0];
-          return '<a href="' + data.url + '" target="_blank">' + data.originalName + '</a>';
-        },
-        settings: {
-          autofocus: false,
-          input: true,
-          tableView: true,
-          label: '',
-          key: 'file',
-          image: false,
-          imageSize: '200',
-          placeholder: '',
-          multiple: false,
-          defaultValue: '',
-          protected: false,
-          persistent: true,
-          hidden: false,
-          clearOnHide: true,
-          filePattern: '*',
-          fileMinSize: '0KB',
-          fileMaxSize: '1GB'
-        },
-        controller: [
-          '$scope',
-          '$timeout',
-          function(
-            $scope,
-            $timeout
-          ) {
-            if ($scope.options && $scope.options.building) return;
-            if ($scope.component.autofocus) {
-              $timeout(function() {
-                angular.element('#' + $scope.component.key + '-browse')[0].focus();
-              });
-            }
-          }
-        ],
-        viewTemplate: 'formio/componentsView/file.html'
-      });
-    }
-  ]);
-
-  app.directive('formioFileList', [function() {
-    return {
-      restrict: 'E',
-      replace: true,
-      scope: {
-        files: '=',
-        form: '=',
-        readOnly: '='
-      },
-      templateUrl: 'formio/components/formio-file-list.html',
-      controller: [
-        '$scope',
-        function($scope) {
-          if ($scope.options && $scope.options.building) return;
-          $scope.removeFile = function(event, index) {
-            var component = $scope.$parent.component;
-            if (component.storage === 'url') {
-              $scope.$parent.formio.makeRequest('', component.url + '/' + $scope.files[index].name, 'delete');
-            }
-            event.preventDefault();
-            $scope.files.splice(index, 1);
-          };
-
-          $scope.fileSize = function(a, b, c, d, e) {
-            return (b = Math, c = b.log, d = 1024, e = c(a) / c(d) | 0, a / b.pow(d, e)).toFixed(2) + ' ' + (e ? 'kMGTPEZY'[--e] + 'B' : 'Bytes');
-          };
-        }
-      ]
-    };
-  }]);
-
-  app.directive('formioImageList', [function() {
-    return {
-      restrict: 'E',
-      replace: true,
-      scope: {
-        files: '=',
-        form: '=',
-        width: '=',
-        readOnly: '='
-      },
-      templateUrl: 'formio/components/formio-image-list.html',
-      controller: [
-        '$scope',
-        function($scope) {
-          if ($scope.options && $scope.options.building) return;
-          $scope.removeFile = function(event, index) {
-            var component = $scope.$parent.component;
-            if (component.storage === 'url') {
-              $scope.$parent.formio.makeRequest('', component.url + '/' + $scope.files[index].name, 'delete');
-            }
-            event.preventDefault();
-            $scope.files.splice(index, 1);
-          };
-        }
-      ]
-    };
-  }]);
-
-  app.directive('formioFile', [function() {
-    return {
-      restrict: 'E',
-      replace: true,
-      scope: {
-        file: '=',
-        form: '='
-      },
-      template: '<a href="{{ file.url }}" ng-click="getFile($event)" target="_blank">{{ file.originalName || file.name }}</a>',
-      controller: [
-        '$window',
-        '$rootScope',
-        '$scope',
-        'Formio',
-        function(
-          $window,
-          $rootScope,
-          $scope,
-          Formio
-        ) {
-          if ($scope.options && $scope.options.building) return;
-          $scope.getFile = function(evt) {
-            evt.preventDefault();
-            $scope.form = $scope.form || $rootScope.filePath;
-            $scope.options = $scope.options || {};
-            var baseUrl = Formio.setScopeBase($scope);
-            var formio = new Formio($scope.form, {base: baseUrl});
-            formio
-              .downloadFile($scope.file).then(function(file) {
-                if (file) {
-                  $window.open(file.url, '_blank');
-                }
-              })
-              .catch(function(response) {
-                // Is alert the best way to do this?
-                // User is expecting an immediate notification due to attempting to download a file.
-                alert(response);
-              });
-          };
-        }
-      ]
-    };
-  }]);
-
-  app.directive('formioImage', [function() {
-    return {
-      restrict: 'E',
-      replace: true,
-      scope: {
-        file: '=',
-        form: '=',
-        width: '='
-      },
-      template: '<img ng-src="{{ file.imageSrc }}" alt="{{ file.originalName || file.name }}" ng-style="{width: width}" />',
-      controller: [
-        '$rootScope',
-        '$scope',
-        'Formio',
-        function(
-          $rootScope,
-          $scope,
-          Formio
-        ) {
-          if ($scope.options && $scope.options.building) return;
-          $scope.form = $scope.form || $rootScope.filePath;
-          $scope.options = $scope.options || {};
-          var baseUrl = Formio.setScopeBase($scope);
-          var formio = new Formio($scope.form, {base: baseUrl});
-          formio.downloadFile($scope.file)
-            .then(function(result) {
-              $scope.file.imageSrc = result.url;
-              $scope.$apply();
-            });
-        }
-      ]
-    };
-  }]);
-
-  app.controller('formioFileUpload', [
-    '$scope',
-    '$interpolate',
-    'FormioUtils',
-    function(
-      $scope,
-      $interpolate,
-      FormioUtils
-    ) {
-      if ($scope.options && $scope.options.building) return;
-      $scope.fileUploads = {};
-      $scope.removeUpload = function(index) {
-        delete $scope.fileUploads[index];
-      };
-
-      // Defaults for unlimited components
-      if (!$scope.component.filePattern) {
-        $scope.component.filePattern = '*';
-      }
-      if (!$scope.component.fileMinSize) {
-        $scope.component.fileMinSize = '0KB';
-      }
-      if (!$scope.component.fileMaxSize) {
-        $scope.component.fileMaxSize = '1GB';
-      }
-
-      $scope.$watch('data.' + $scope.component.key, function(value) {
-        // For some reason required validation doesn't fire properly after removing an item from an array which results
-        // in an empty array that is marked as valid. Fix by removing the empty array.
-        // Check also if the component value is an array with an empty string: [""]
-        var isEmptyArray = Array.isArray(value) && value.length === 0;
-        var isArrayWithEmptyItem = Array.isArray(value) && value.length === 1 && !value[0];
-        if (isEmptyArray || isArrayWithEmptyItem) {
-          delete $scope.data[$scope.component.key];
-        }
-        // The file model is not getting dirty automatically
-        var form = $scope.$parent[$scope.formName];
-        var componentModel = form ? form[$scope.component.key] : null;
-        if (componentModel) {
-          componentModel.$validate();
-          componentModel.$setDirty();
-        }
-      }, true);
-
-      $scope.browseKeyPress = function($event) {
-        if ($event.key === 'Enter') {
-          angular.element('#' + $scope.component.key + '-browse').triggerHandler('click');
-        }
-      };
-
-      $scope.invalidFiles = [];
-      $scope.currentErrors = [];
-      $scope.upload = function(files, invalidFiles) {
-        if (invalidFiles.length) {
-          angular.forEach(invalidFiles, function(fileError) {
-            if (fileError.$error === 'pattern') {
-              fileError.$error = 'custom';
-              $scope.component.customError = 'File extension does not match the pattern ' + $scope.component.filePattern;
-            }
-            if (fileError.$error === 'maxSize') {
-              fileError.$error = 'custom';
-              $scope.component.customError = 'File size is larger than the allowed ' + $scope.component.fileMaxSize;
-            }
-            if (fileError.$error === 'minSize') {
-              fileError.$error = 'custom';
-              $scope.component.customError = 'File size is smaller than the allowed ' + $scope.component.fileMinSize;
-            }
-
-            $scope.currentErrors.push(fileError.$error);
-            $scope.formioForm[$scope.componentId].$setValidity(fileError.$error, false);
-            $scope.formioForm[$scope.componentId].$setDirty();
-          });
-          return;
-        }
-        else {
-          angular.forEach($scope.currentErrors, function(err) {
-            $scope.formioForm[$scope.componentId].$setValidity(err, true);
-          });
-          $scope.currentErrors = [];
-        }
-
-        if ($scope.component.storage && files && files.length) {
-          angular.forEach(files, function(file) {
-            // Get a unique name for this file to keep file collisions from occurring.
-            var fileName = FormioUtils.uniqueName(file.name);
-            $scope.fileUploads[fileName] = {
-              originalName: file.name,
-              name: fileName,
-              size: file.size,
-              status: 'info',
-              message: 'Starting upload'
-            };
-            var dir = $scope.component.dir || '';
-            dir = $interpolate(dir)({data: $scope.data, row: $scope.row});
-            var formio = $scope.formio || new Formio();
-
-            if (formio) {
-              formio.uploadFile($scope.component.storage, file, fileName, dir, function processNotify(evt) {
-                $scope.fileUploads[fileName].status = 'progress';
-                $scope.fileUploads[fileName].progress = parseInt(100.0 * evt.loaded / evt.total);
-                delete $scope.fileUploads[fileName].message;
-                $scope.$apply();
-              }, $scope.component.url)
-                .then(function(fileInfo) {
-                  // Attach the original file name back to the file info.
-                  fileInfo.originalName = file.name;
-
-                  delete $scope.fileUploads[fileName];
-                  // This fixes new fields having an empty space in the array.
-                  if ($scope.data && $scope.data[$scope.component.key] === '') {
-                    $scope.data[$scope.component.key] = [];
-                  }
-                  if ($scope.data && $scope.data[$scope.component.key] === undefined) {
-                    $scope.data[$scope.component.key] = [];
-                  }
-                  if (!$scope.data[$scope.component.key] || !($scope.data[$scope.component.key] instanceof Array)) {
-                    $scope.data[$scope.component.key] = [];
-                  }
-
-                  $scope.data[$scope.component.key].push(fileInfo);
-                  $scope.$apply();
-                  $scope.$emit('fileUploaded', fileName, fileInfo);
-                })
-                .catch(function(response) {
-                  $scope.fileUploads[fileName].status = 'error';
-                  $scope.fileUploads[fileName].message = response.data;
-                  delete $scope.fileUploads[fileName].progress;
-                  $scope.$apply();
-                  $scope.$emit('fileUploadFailed', fileName, response);
-                });
-            }
-          });
-        }
-      };
-    }
-  ]);
-  app.directive('validateItemsLength', function() {
-    return {
-      require: 'ngModel',
-      link: function(scope, ele, attrs, ngModelCtrl) {
-        ngModelCtrl.$validators.minItems = function(modelValue, viewValue) {
-          var isValid = true;
-          if (scope.component && !isNaN(scope.component.validate.minItems)) {
-            if (Array.isArray(modelValue)) {
-              isValid = modelValue.length >= scope.component.validate.minItems;
-            } else {
-              isValid = false;
-            }
-          }
-          ngModelCtrl.$error.minItems = !isValid;
-          return isValid;
-        }
-        ngModelCtrl.$validators.maxItems = function(modelValue, viewValue) {
-          var isValid = true;
-          if (scope.component && !isNaN(scope.component.validate.maxItems)) {
-            if (Array.isArray(modelValue)) {
-              isValid = modelValue.length <= scope.component.validate.maxItems;
-            }
-          }
-          ngModelCtrl.$error.maxItems = !isValid;
-          return isValid;
-        }
-      }
-    };
-  });
-  app.run([
-    '$templateCache',
-    function(
-      $templateCache
-    ) {
-      $templateCache.put('formio/components/formio-image-list.html',
-        "<div>\n  <span ng-repeat=\"file in files track by $index\" ng-if=\"file\">\n    <formio-image file=\"file\" form=\"form\" width=\"width\"></formio-image>\n    <span ng-if=\"!readOnly\" style=\"width:1%;white-space:nowrap;\">\n      <a href=\"#\" ng-click=\"removeFile($event, $index)\" style=\"padding: 2px 4px;\" class=\"btn btn-sm btn-default\"><span class=\"glyphicon glyphicon-remove\"></span></a>\n    </span>\n  </span>\n</div>\n"
-      );
-
-      $templateCache.put('formio/components/formio-file-list.html',
-        "<table class=\"table table-striped table-bordered\">\n  <thead>\n    <tr>\n      <td ng-if=\"!readOnly\" style=\"width:1%;white-space:nowrap;\"></td>\n      <th>File Name</th>\n      <th>Size</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr ng-repeat=\"file in files track by $index\">\n      <td ng-if=\"!readOnly\" style=\"width:1%;white-space:nowrap;\"><a ng-if=\"!readOnly\" href=\"#\" ng-click=\"removeFile($event, $index)\" style=\"padding: 2px 4px;\" class=\"btn btn-sm btn-default\"><span class=\"glyphicon glyphicon-remove\"></span></a></td>\n      <td><formio-file file=\"file\" form=\"form\"></formio-file></td>\n      <td>{{ fileSize(file.size) }}</td>\n    </tr>\n  </tbody>\n</table>\n"
-      );
-
-      $templateCache.put('formio/components/file.html',
-        "<label ng-if=\"labelVisible() && (component.labelPosition !== 'bottom')\" for=\"{{ componentId }}\" class=\"control-label\" ng-class=\"{'field-required': isRequired(component)}\" ng-style=\"getLabelStyles(component)\">\n  {{ component.label | formioTranslate:null:options.building }}\n  <formio-component-tooltip></formio-component-tooltip>\n</label>\n<span ng-if=\"!component.label && isRequired(component)\" class=\"glyphicon glyphicon-asterisk form-control-feedback field-required-inline\" aria-hidden=\"true\"></span>\n<div class=\"formio-errors\"><formio-errors ng-if=\"::!options.building\"></formio-errors></div>\n<div ng-controller=\"formioFileUpload\" ng-style=\"getInputGroupStyles(component)\">\n  <formio-file-list files=\"data[component.key]\" form=\"formio.formUrl\" ng-if=\"!component.image\" ng-required=\"isRequired(component)\" validate-items-length ng-model=\"data[component.key]\" ng-model-options=\"{allowInvalid: true}\" name=\"{{ componentId }}\" read-only=\"readOnly\"></formio-file-list>\n  <formio-image-list files=\"data[component.key]\" form=\"formio.formUrl\" width=\"component.imageSize\" ng-if=\"component.image\" validate-items-length ng-required=\"isRequired(component)\" ng-model=\"data[component.key]\" ng-model-options=\"{allowInvalid: true}\" name=\"{{ componentId }}\" read-only=\"readOnly\"></formio-image-list>\n  <div ng-if=\"!readOnly && (component.multiple || (!component.multiple && !data[component.key].length))\">\n    <div ngf-drop=\"upload($files, $invalidFiles)\"\n      class=\"fileSelector\"\n      ngf-drag-over-class=\"'fileDragOver'\"\n      ngf-pattern=\"component.filePattern\"\n      ngf-min-size=\"component.fileMinSize\"\n      ngf-max-size=\"component.fileMaxSize\"\n      ngf-multiple=\"component.multiple\"\n      id=\"{{ componentId }}\"\n      name=\"{{ componentId }}\">\n      <span class=\"glyphicon glyphicon-cloud-upload\"></span>Drop files to attach, or\n      <a style=\"cursor: pointer;\"\n        ng-keypress=\"browseKeyPress($event)\"\n        ng-attr-id=\"{{component.key}}-browse\"\n        ngf-select=\"upload($files, $invalidFiles)\"\n        tabindex=\"{{ component.tabindex || 0 }}\"\n        ngf-pattern=\"component.filePattern\"\n        ngf-min-size=\"component.fileMinSize\"\n        ngf-max-size=\"component.fileMaxSize\"\n        ngf-multiple=\"component.multiple\">browse</a>.\n    </div>\n    <div ng-if=\"!component.storage\" class=\"alert alert-warning\">No storage has been set for this field. File uploads are disabled until storage is set up.</div>\n    <div ngf-no-file-drop>File Drag/Drop is not supported for this browser</div>\n  </div>\n  <div ng-repeat=\"fileUpload in fileUploads track by $index\" ng-class=\"{'has-error': fileUpload.status === 'error'}\" class=\"file\">\n    <div class=\"row\">\n      <div class=\"fileName control-label col-sm-10\">{{ fileUpload.originalName || fileUpload.name }} <span ng-click=\"removeUpload(fileUpload.name)\" class=\"glyphicon glyphicon-remove\"></span></div>\n      <div class=\"fileSize control-label col-sm-2 text-right\">{{ fileSize(fileUpload.size) }}</div>\n    </div>\n    <div class=\"row\">\n      <div class=\"col-sm-12\">\n        <span ng-if=\"fileUpload.status === 'progress'\">\n          <div class=\"progress\">\n            <div class=\"progress-bar\" role=\"progressbar\" aria-valuenow=\"{{fileUpload.progress}}\" aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width:{{fileUpload.progress}}%\">\n              <span class=\"sr-only\">{{fileUpload.progress}}% Complete</span>\n            </div>\n          </div>\n        </span>\n        <div ng-if=\"!fileUpload.status !== 'progress'\" class=\"bg-{{ fileUpload.status }} control-label\">{{ fileUpload.message }}</div>\n      </div>\n    </div>\n  </div>\n</div>\n<label ng-if=\"labelVisible() && (component.labelPosition === 'bottom')\" for=\"{{ componentId }}\" class=\"control-label control-label--bottom\" ng-class=\"{'field-required': isRequired(component)}\">\n  {{ component.label | formioTranslate:null:options.building }}\n  <formio-component-tooltip></formio-component-tooltip>\n</label>\n"
-      );
-
-      $templateCache.put('formio/componentsView/file.html',
-        "<label ng-if=\"labelVisible()\" for=\"{{ component.key }}\" class=\"control-label\" ng-class=\"{'field-required': component.validate.required}\">{{ component.label | formioTranslate:null:options.building }}</label>\n<div ng-controller=\"formioFileUpload\">\n  <formio-file-list files=\"data[component.key]\" form=\"formUrl\" read-only=\"true\" ng-if=\"!component.image\"></formio-file-list>\n  <formio-image-list files=\"data[component.key]\" form=\"formUrl\" read-only=\"true\" width=\"component.imageSize\" ng-if=\"component.image\"></formio-image-list>\n</div>\n"
-      );
-    }
-  ]);
-};
-
-},{}],445:[function(_dereq_,module,exports){
-"use strict";
-
-var isEmpty = _dereq_('lodash/isEmpty');
-var GridUtils = _dereq_('../factories/GridUtils')();
-
-module.exports = function(app) {
-  app.config([
-    'formioComponentsProvider',
-    function(formioComponentsProvider) {
-      formioComponentsProvider.register('form', {
-        title: 'Form',
-        template: 'formio/components/form.html',
-        group: 'advanced',
-        settings: {
-          clearOnHide: true,
-          input: true,
-          tableView: true,
-          key: 'formField',
-          src: '',
-          reference: true,
-          form: '',
-          path: '',
-          label: '',
-          protected: false,
-          unique: false,
-          persistent: true
-        },
-        controller: [
-          '$scope',
-          'FormioUtils',
-          'Formio',
-          '$timeout',
-          function(
-            $scope,
-            FormioUtils,
-            Formio,
-            $timeout
-          ) {
-            $scope.options = $scope.options || {};
-            var baseUrl = Formio.setScopeBase($scope);
-            if (!$scope.data[$scope.component.key]) {
-              $scope.data[$scope.component.key] = {data: {}};
-            }
-
-            var loadForm = function() {
-              if (!$scope.component.form) {
-                return;
-              }
-
-              var url = '';
-              if ($scope.component.src) {
-                url = $scope.component.src;
-              }
-              else if ($scope.formio && $scope.component.form) {
-                url = $scope.formio.formsUrl + '/' + $scope.component.form;
-              }
-
-              if (!url) {
-                console.warn('Cannot load form. Need to pass in src or url to formio directive.');
-                return;
-              }
-
-              if ($scope.data[$scope.component.key] && $scope.data[$scope.component.key]._id) {
-                // Submission url should refer to the submission's form.
-                $scope.submissionFormio = new Formio($scope.formio.formsUrl + '/' + $scope.data[$scope.component.key].form + '/submission/' + $scope.data[$scope.component.key]._id, {base: baseUrl});
-              }
-              else {
-                // Submission url is the same as the form url.
-                $scope.submissionFormio = new Formio(url, {base: baseUrl});
-              }
-              $scope.url = url;
-
-              $scope.formFormio = new Formio(url, {base: baseUrl});
-              if ($scope.formFormio.formId) {
-                $scope.formFormio.loadForm().then(function(formObj) {
-                  if (!formObj) {
-                    return;
-                  }
-                  if ($scope.componentForm) {
-                    if ($scope.componentForm._id === formObj._id) {
-                      return;
-                    }
-                    $scope.componentForm = null;
-                  }
-                  $timeout(function() {
-                    $scope.componentForm = formObj;
-                  });
-                });
-              }
-
-              // See if we need to load the submission into scope.
-              if (
-                $scope.submissionFormio.submissionId &&
-                $scope.data[$scope.component.key] &&
-                $scope.data[$scope.component.key]._id &&
-                isEmpty($scope.data[$scope.component.key].data)
-              ) {
-                $scope.submissionFormio.loadSubmission().then(function(submission) {
-                  if (!submission) {
-                    return;
-                  }
-
-                  angular.merge($scope.data[$scope.component.key], submission);
-                });
-              }
-            };
-
-            var submitForm = function(scope, cb) {
-              var submission = angular.copy($scope.data[$scope.component.key]);
-
-              // Only save if we have provided data.
-              if (angular.equals(submission, {})) {
-                return;
-              }
-
-              var components = [];
-              if (scope.activePage) {
-                components = scope.activePage.components;
-              }
-              else if (scope.form) {
-                components = scope.form.components;
-              }
-              if (FormioUtils.getComponent(components, $scope.component.key)) {
-                $scope.submissionFormio.saveSubmission(submission).then(function(sub) {
-                  if (!$scope.data[$scope.component.key]) {
-                    $scope.data[$scope.component.key] = {data: {}};
-                  }
-                  angular.merge($scope.data[$scope.component.key], sub);
-                  cb();
-                }, cb);
-              }
-              else {
-                return cb();
-              }
-            };
-
-            // Hook into the submit method.
-            FormioUtils.hook($scope.component.key + ':submit', function(scope, data, cb) {
-              submitForm(scope, cb);
-            });
-
-            // Hook into the nextpage method.
-            FormioUtils.hook($scope.component.key + ':nextPage', function(scope, cb) {
-              submitForm(scope, cb);
-            });
-
-            // Hook into the prevpage method.
-            FormioUtils.hook($scope.component.key + ':prevPage', function(scope, cb) {
-              submitForm(scope, cb);
-            });
-
-            // Make sure to hide the submit button on the loaded form.
-            $scope.$on('formLoad', function(err, form) {
-              FormioUtils.eachComponent(form.components, function(component) {
-                if ((component.type === 'button') && (component.action === 'submit')) {
-                  component.hidden = true;
-                }
-              });
-            });
-
-            $scope.$watch('component.form', function() {
-              loadForm();
-            });
-
-            $scope.$watch('data[component.key]', function(submission) {
-              if (!submission) {
-                return;
-              }
-              angular.merge($scope.data[$scope.component.key], submission);
-            }, true);
-          }
-        ],
-        tableView: function(data, options) {
-          // Include only form data.
-          return data ? GridUtils.generic(data.data, options) : '';
-        }
-      });
-    }
-  ]);
-  app.run([
-    '$templateCache',
-    function($templateCache) {
-      $templateCache.put('formio/components/form.html',
-        "<i style=\"font-size: 2em;\" ng-if=\"!componentForm\" ng-class=\"{'formio-hidden': componentForm}\" class=\"formio-loading glyphicon glyphicon-refresh glyphicon-spin\"></i>\n<formio\n  ng-if=\"componentForm\"\n  form=\"componentForm\"\n  submission=\"data[component.key]\"\n  url=\"url\"\n  read-only=\"readOnly\"\n  hide-components=\"hideComponents\"\n  options=\"options\"\n  name=\"componentId\"\n></formio>\n"
-      );
-    }
-  ]);
-};
-
-},{"../factories/GridUtils":488,"lodash/isEmpty":379}],446:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":479}],440:[function(_dereq_,module,exports){
 "use strict";
 
 var GridUtils = _dereq_('../factories/GridUtils')();
@@ -100874,7 +99097,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":488}],447:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":479}],441:[function(_dereq_,module,exports){
 "use strict";
 
 
@@ -100968,7 +99191,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],448:[function(_dereq_,module,exports){
+},{}],442:[function(_dereq_,module,exports){
 "use strict";
 var app = angular.module('formio');
 
@@ -100976,7 +99199,7 @@ var app = angular.module('formio');
 _dereq_('./components')(app);
 _dereq_('./textfield')(app);
 _dereq_('./number')(app);
-_dereq_('./password')(app);
+//require('./password')(app);
 _dereq_('./textarea')(app);
 _dereq_('./checkbox')(app);
 _dereq_('./selectboxes')(app);
@@ -100995,14 +99218,14 @@ _dereq_('./day')(app);
 _dereq_('./time')(app);
 _dereq_('./currency')(app);
 _dereq_('./hidden')(app);
-_dereq_('./resource')(app);
-_dereq_('./file')(app);
-_dereq_('./form')(app);
-_dereq_('./signature')(app);
-_dereq_('./custom')(app);
+//require('./resource')(app);
+//require('./file')(app);
+//require('./form')(app);
+//require('./signature')(app);
+//require('./custom')(app);
 _dereq_('./container')(app);
-_dereq_('./datagrid')(app);
-_dereq_('./editgrid')(app);
+//require('./datagrid')(app);
+//require('./editgrid')(app);
 _dereq_('./survey')(app);
 
 // Layout
@@ -101019,7 +99242,7 @@ _dereq_('./timeline')(app);
 _dereq_('./prism')(app);
 _dereq_('./surveyImage')(app);
 
-},{"./address":429,"./button":430,"./checkbox":431,"./columns":432,"./components":433,"./container":434,"./content":435,"./currency":436,"./custom":437,"./datagrid":438,"./datetime":439,"./day":440,"./editgrid":441,"./email":442,"./fieldset":443,"./file":444,"./form":445,"./hidden":446,"./htmlelement":447,"./number":449,"./page":450,"./panel":451,"./password":452,"./phonenumber":453,"./prism":454,"./radio":455,"./rangeslider":456,"./resource":457,"./select":458,"./selectboxes":459,"./signature":460,"./survey":461,"./surveyImage":462,"./table":463,"./textarea":464,"./textfield":465,"./time":466,"./timeline":467,"./well":468}],449:[function(_dereq_,module,exports){
+},{"./address":428,"./button":429,"./checkbox":430,"./columns":431,"./components":432,"./container":433,"./content":434,"./currency":435,"./datetime":436,"./day":437,"./email":438,"./fieldset":439,"./hidden":440,"./htmlelement":441,"./number":443,"./page":444,"./panel":445,"./phonenumber":446,"./prism":447,"./radio":448,"./rangeslider":449,"./select":450,"./selectboxes":451,"./survey":452,"./surveyImage":453,"./table":454,"./textarea":455,"./textfield":456,"./time":457,"./timeline":458,"./well":459}],443:[function(_dereq_,module,exports){
 "use strict";
 
 var createNumberMask = _dereq_('text-mask-addons').createNumberMask;
@@ -101116,7 +99339,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"lodash/get":369,"lodash/isNil":386,"text-mask-addons":425}],450:[function(_dereq_,module,exports){
+},{"lodash/get":369,"lodash/isNil":386,"text-mask-addons":424}],444:[function(_dereq_,module,exports){
 "use strict";
 
 module.exports = function(app) {
@@ -101143,7 +99366,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],451:[function(_dereq_,module,exports){
+},{}],445:[function(_dereq_,module,exports){
 "use strict";
 
 var GridUtils = _dereq_('../factories/GridUtils')();
@@ -101206,39 +99429,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":488}],452:[function(_dereq_,module,exports){
-"use strict";
-module.exports = function(app) {
-  app.config([
-    'formioComponentsProvider',
-    function(formioComponentsProvider) {
-      formioComponentsProvider.register('password', {
-        title: 'Password',
-        template: 'formio/components/textfield.html',
-        tableView: function() {
-          return '--- PROTECTED ---';
-        },
-        settings: {
-          autofocus: false,
-          input: true,
-          tableView: false,
-          inputType: 'password',
-          label: 'Password',
-          key: 'password',
-          placeholder: '',
-          prefix: '',
-          suffix: '',
-          protected: true,
-          persistent: true,
-          hidden: false,
-          clearOnHide: true
-        }
-      });
-    }
-  ]);
-};
-
-},{}],453:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":479}],446:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function(app) {
   app.config([
@@ -101275,7 +99466,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],454:[function(_dereq_,module,exports){
+},{}],447:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function (app) {
   app.config([
@@ -101348,7 +99539,7 @@ module.exports = function (app) {
     }
   ]);
 };
-},{}],455:[function(_dereq_,module,exports){
+},{}],448:[function(_dereq_,module,exports){
 "use strict";
 
 
@@ -101401,7 +99592,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],456:[function(_dereq_,module,exports){
+},{}],449:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function (app) {
   app.config([
@@ -101478,257 +99669,7 @@ module.exports = function (app) {
   ]);
 };
 
-},{}],457:[function(_dereq_,module,exports){
-"use strict";
-
-module.exports = function(app) {
-  app.config([
-    'formioComponentsProvider',
-    function(formioComponentsProvider) {
-      formioComponentsProvider.register('resource', {
-        title: 'Resource',
-        tableView: function(data, options) {
-          if (options.$interpolate) {
-            return options.$interpolate(options.component.template)({item: data});
-          }
-
-          return data ? data._id : '';
-        },
-        template: function($scope) {
-          return $scope.component.multiple ? 'formio/components/resource-multiple.html' : 'formio/components/resource.html';
-        },
-        controller: [
-          '$scope',
-          'Formio',
-          'ngDialog',
-          '$location',
-          '$timeout',
-          function(
-            $scope,
-            Formio,
-            ngDialog,
-            $location,
-            $timeout
-          ) {
-            if ($scope.options && $scope.options.building) return;
-            var settings = $scope.component;
-            var params = settings.params || {};
-
-            if (settings.autofocus) {
-              $timeout(function() {
-                var inputs = angular.element('#form-group-' + settings.key).find('input');
-                inputs[settings.multiple ? 0 : 1].focus();
-              });
-            }
-
-            $scope.selectItems = [];
-            $scope.hasNextPage = false;
-            $scope.resourceLoading = false;
-            $scope.options = $scope.options || {};
-            params.limit = 100;
-            params.skip = 0;
-            if (settings.multiple) {
-              settings.defaultValue = [];
-            }
-            if (settings.resource) {
-              var baseUrl = Formio.setScopeBase($scope);
-              var url = '';
-              if ($scope.formio) {
-                url = $scope.formio.formsUrl + '/' + settings.resource;
-              }
-              else {
-                url = baseUrl;
-                if (settings.project) {
-                  url += '/project/' + settings.project;
-                }
-                url += '/form/' + settings.resource;
-              }
-
-              var formio = new Formio(url, {base: baseUrl});
-
-              // Refresh the items.
-              $scope.refreshSubmissions = function(input, append) {
-                if ($scope.resourceLoading) {
-                  return;
-                }
-                $scope.resourceLoading = true;
-
-                // If they wish to return only some fields.
-                if (settings.selectFields) {
-                  params.select = settings.selectFields;
-                }
-
-                // If they wish to return only some submissions.
-                var makeSelection = false;
-                if (settings.searchFields && input) {
-                  angular.forEach(settings.searchFields, function(field) {
-                    if (field === '_id') {
-                      delete params[field];
-                    }
-                    else {
-                      params[field] = input;
-                    }
-                  });
-                }
-                else if (settings.searchFields && input === undefined) {
-                  var search = $location.search();
-                  angular.forEach(settings.searchFields, function(field) {
-                    var key = $scope.component.key + '.' + field;
-                    if (search[key]) {
-                      params[field] = search[key];
-                      makeSelection = true;
-                    }
-                  });
-                }
-
-                // If not loading more then start from the beginning.
-                if (!append) {
-                  params.skip = 0;
-                }
-
-                // Load the submissions.
-                formio.loadSubmissions({
-                  params: params
-                }).then(function(submissions) {
-                  submissions = submissions || [];
-                  if (append) {
-                    $scope.selectItems = $scope.selectItems.concat(submissions);
-                  }
-                  else {
-                    $scope.selectItems = submissions;
-                    // If only one choice then select it.
-                    if (makeSelection && submissions.length === 1) {
-                      var component = $scope.component;
-                      var data      = $scope.data;
-                      if (component.multiple) {
-                        data[component.key] = submissions;
-                      }
-                      else {
-                        data[component.key] = submissions[0];
-                      }
-                    }
-                  }
-                  $scope.hasNextPage = (submissions.length >= params.limit) && ($scope.selectItems.length < submissions.serverCount);
-                })['finally'](function() {
-                  $scope.resourceLoading = false;
-                });
-              };
-
-              // Load more items.
-              $scope.loadMoreItems = function($select, $event) {
-                $event.stopPropagation();
-                $event.preventDefault();
-                params.skip += params.limit;
-                $scope.refreshSubmissions(null, true);
-              };
-
-              $scope.refreshSubmissions();
-
-              // Add a new resource.
-              $scope.newResource = function() {
-                var template  = '<br>' +
-                                '<div class="row">' +
-                                  '<div class="col-sm-12">' +
-                                    '<div class="panel panel-default">' +
-                                      '<div class="panel-heading">' +
-                                        '<h3 class="panel-title">{{ component.addResourceLabel || "Add Resource" | formioTranslate}}</h3>' +
-                                      '</div>' +
-                                      '<div class="panel-body">' +
-                                        '<formio src="formUrl"></formio>' +
-                                      '</div>' +
-                                    '</div>' +
-                                  '</div>' +
-                                '</div>';
-
-                ngDialog.open({
-                  template: template,
-                  plain: true,
-                  scope: $scope,
-                  controller: ['$scope', function($scope) {
-                    $scope.formUrl = $scope.formio.formsUrl + '/' + $scope.component.resource;
-
-                    // Bind when the form is loaded.
-                    $scope.$on('formLoad', function(event) {
-                      event.stopPropagation(); // Don't confuse app
-                    });
-
-                    // Bind when the form is submitted.
-                    $scope.$on('formSubmission', function(event, submission) {
-                      var component = $scope.component;
-                      var data      = $scope.data;
-
-                      if (component.multiple) {
-                        data[component.key].push(submission);
-                      }
-                      else {
-                        data[component.key] = submission;
-                      }
-
-                      $scope.refreshSubmissions(null);
-                      $scope.closeThisDialog(submission);
-                    });
-                  }]
-                }).closePromise.then(function(/*e*/) {
-                //var cancelled = e.value === false || e.value === '$closeButton' || e.value === '$document';
-                });
-              };
-
-              // Close all open dialogs on state change (using UI-Router).
-              $scope.$on('$stateChangeStart', function() {
-                ngDialog.closeAll(false);
-              });
-
-              // Close all open dialogs on route change (using ngRoute).
-              $scope.$on('$routeChangeStart', function() {
-                ngDialog.closeAll(false);
-              });
-            }
-          }
-        ],
-        group: 'advanced',
-        settings: {
-          autofocus: false,
-          input: true,
-          tableView: true,
-          label: 'Resource',
-          key: 'resource',
-          placeholder: '',
-          resource: '',
-          project: '',
-          defaultValue: '',
-          template: '<span>{{ item.data }}</span>',
-          selectFields: '',
-          searchFields: '',
-          multiple: false,
-          protected: false,
-          persistent: true,
-          hidden: false,
-          clearOnHide: true,
-          validate: {
-            required: false
-          },
-          defaultPermission: ''
-        }
-      });
-    }
-  ]);
-
-  app.run([
-    '$templateCache',
-    function($templateCache) {
-      $templateCache.put('formio/components/resource.html',
-        "<div ng-if=\"!component.addResource\">\n  <label ng-if=\"labelVisible() && (component.labelPosition !== 'bottom')\" for=\"{{ componentId }}\" class=\"control-label\" ng-class=\"{'field-required': isRequired(component)}\" ng-style=\"getLabelStyles(component)\"\n         id=\"{{ componentId+'Label'}}\">\n    {{ component.label | formioTranslate:null:options.building }}\n    <formio-component-tooltip></formio-component-tooltip>\n  </label>\n  <span ng-if=\"!component.label && isRequired(component)\" class=\"glyphicon glyphicon-asterisk form-control-feedback field-required-inline\" aria-hidden=\"true\"></span>\n  <ui-select ui-select-required safe-multiple-to-single ng-model=\"data[component.key]\" ng-model-options=\"{allowInvalid: true}\" ng-disabled=\"readOnly\" ng-required=\"isRequired(component)\" id=\"{{ componentId }}\" name=\"{{ componentId }}\"  aria-labelledby=\"{{ componentId +'Label'}}\"\n             aria-describedby=\"{{componentId + 'Desc'}}\" theme=\"bootstrap\" tabindex=\"{{ component.tabindex || 0 }}\" ng-style=\"getInputGroupStyles(component)\"\n             formio-custom-attributes=\"{{component.attributes}}\">\n    <ui-select-match class=\"ui-select-match\" placeholder=\"{{ component.placeholder | formioTranslate:null:options.building }}\">\n      <formio-select-item template=\"component.template\" item=\"$item || $select.selected\" select=\"$select\"></formio-select-item>\n    </ui-select-match>\n    <ui-select-choices class=\"ui-select-choices\" repeat=\"item in selectItems | filter: $select.search\" refresh=\"refreshSubmissions($select.search)\" refresh-delay=\"250\">\n      <formio-select-item template=\"component.template\" item=\"item\" select=\"$select\"></formio-select-item>\n      <button ng-if=\"hasNextPage && ($index == $select.items.length-1)\" class=\"btn btn-success btn-block\" ng-click=\"loadMoreItems($select, $event)\" ng-disabled=\"resourceLoading\">Load more...</button>\n    </ui-select-choices>\n  </ui-select>\n  <label ng-if=\"labelVisible() && (component.labelPosition === 'bottom')\" for=\"{{ componentId }}\" class=\"control-label control-label--bottom\" ng-class=\"{'field-required': isRequired(component)}\"\n         id=\"{{ componentId+'Label' }}\">\n    {{ component.label | formioTranslate:null:options.building }}\n    <formio-component-tooltip></formio-component-tooltip>\n  </label>\n  <formio-errors ng-if=\"::!options.building\"></formio-errors>\n</div>\n<div ng-if=\"component.addResource\">\n  <table class=\"table table-bordered\">\n    <label ng-if=\"labelVisible()\" for=\"{{ componentId }}\" class=\"control-label\" ng-class=\"{'field-required': isRequired(component)}\">\n      {{ component.label | formioTranslate:null:options.building }}\n      <formio-component-tooltip></formio-component-tooltip>\n    </label>\n    <span ng-if=\"!component.label && isRequired(component)\" class=\"glyphicon glyphicon-asterisk form-control-feedback field-required-inline\" aria-hidden=\"true\"></span>\n    <tr>\n      <td>\n        <ui-select ui-select-required safe-multiple-to-single ng-model=\"data[component.key]\" ng-model-options=\"{allowInvalid: true}\" ng-disabled=\"readOnly\" ng-required=\"isRequired(component)\" id=\"{{ componentId }}\" name=\"{{ componentId }}\" theme=\"bootstrap\" tabindex=\"{{ component.tabindex || 0 }}\"\n                   formio-custom-attributes=\"{{component.attributes}}\">\n          <ui-select-match class=\"ui-select-match\" placeholder=\"{{ component.placeholder | formioTranslate:null:options.building }}\">\n            <formio-select-item template=\"component.template\" item=\"$item || $select.selected\" select=\"$select\"></formio-select-item>\n          </ui-select-match>\n          <ui-select-choices class=\"ui-select-choices\" repeat=\"item in selectItems | filter: $select.search\" refresh=\"refreshSubmissions($select.search)\" refresh-delay=\"250\">\n            <formio-select-item template=\"component.template\" item=\"item\" select=\"$select\"></formio-select-item>\n            <button ng-if=\"hasNextPage && ($index == $select.items.length-1)\" class=\"btn btn-success btn-block\" ng-click=\"loadMoreItems($select, $event)\" ng-disabled=\"resourceLoading\">Load more...</button>\n          </ui-select-choices>\n        </ui-select>\n        <formio-errors ng-if=\"::!options.building\"></formio-errors>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <a ng-click=\"newResource()\" class=\"btn btn-primary\">\n          <span class=\"glyphicon glyphicon-plus\" aria-hidden=\"true\"></span> {{ component.addResourceLabel || \"Add Resource\" | formioTranslate:null:options.building}}\n        </a>\n      </td>\n    </tr>\n  </table>\n</div>\n"
-      );
-
-      // Change the ui-select to ui-select multiple.
-      $templateCache.put('formio/components/resource-multiple.html',
-        $templateCache.get('formio/components/resource.html').replace(/<ui-select\s/g, '<ui-select multiple ')
-      );
-    }
-  ]);
-};
-
-},{}],458:[function(_dereq_,module,exports){
+},{}],450:[function(_dereq_,module,exports){
 "use strict";
 /*eslint max-depth: ["error", 6]*/
 
@@ -102353,7 +100294,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"lodash/assign":359,"lodash/cloneDeep":362,"lodash/get":369,"lodash/isEqual":380,"lodash/isNil":386,"lodash/mapValues":399,"lodash/set":405}],459:[function(_dereq_,module,exports){
+},{"lodash/assign":359,"lodash/cloneDeep":362,"lodash/get":369,"lodash/isEqual":380,"lodash/isNil":386,"lodash/mapValues":399,"lodash/set":405}],451:[function(_dereq_,module,exports){
 "use strict";
 
 
@@ -102469,149 +100410,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],460:[function(_dereq_,module,exports){
-"use strict";
-
-var SignaturePad = _dereq_('signature_pad');
-module.exports = function(app) {
-  app.config([
-    'formioComponentsProvider',
-    function(formioComponentsProvider) {
-      formioComponentsProvider.register('signature', {
-        title: 'Signature',
-        template: 'formio/components/signature.html',
-        tableView: function(data) {
-          return data ? 'Yes' : 'No';
-        },
-        group: 'advanced',
-        settings: {
-          input: true,
-          tableView: true,
-          label: 'Signature',
-          key: 'signature',
-          placeholder: '',
-          footer: 'Sign above',
-          width: '100%',
-          height: '150',
-          penColor: 'black',
-          backgroundColor: 'rgb(245,245,235)',
-          minWidth: '0.5',
-          maxWidth: '2.5',
-          protected: false,
-          persistent: true,
-          hidden: false,
-          clearOnHide: true,
-          validate: {
-            required: false
-          }
-        },
-        viewTemplate: 'formio/componentsView/signature.html'
-      });
-    }
-  ]);
-  app.directive('signature', function() {
-    return {
-      restrict: 'A',
-      scope: {
-        component: '='
-      },
-      require: '?ngModel',
-      link: function(scope, element, attrs, ngModel) {
-        if (scope.options && scope.options.building) return;
-        if (!ngModel) {
-          return;
-        }
-
-        // Sets the label of component for error display.
-        scope.component.label = 'Signature';
-        scope.component.hideLabel = true;
-
-        // Sets the dimension of a width or height.
-        var setDimension = function(dim) {
-          var param = (dim === 'width') ? 'clientWidth' : 'clientHeight';
-          if (scope.component[dim].slice(-1) === '%') {
-            var percent = parseFloat(scope.component[dim].slice(0, -1)) / 100;
-            element[0][dim] = element.parent().eq(0)[0][param] * percent;
-          }
-          else {
-            element[0][dim] = parseInt(scope.component[dim], 10);
-            scope.component[dim] = element[0][dim] + 'px';
-          }
-        };
-
-        // Set the width and height of the canvas.
-        // Reset size if element changes visibility.
-        scope.$watch('component.display', function() {
-          setDimension('width');
-          setDimension('height');
-        });
-
-        // Create the signature pad.
-        var signaturePad = new SignaturePad(element[0], {
-          minWidth: scope.component.minWidth,
-          maxWidth: scope.component.maxWidth,
-          penColor: scope.component.penColor,
-          backgroundColor: scope.component.backgroundColor
-        });
-
-        scope.$watch('component.penColor', function(newValue) {
-          signaturePad.penColor = newValue;
-        });
-
-        scope.$watch('component.backgroundColor', function(newValue) {
-          signaturePad.backgroundColor = newValue;
-          signaturePad.clear();
-        });
-
-        // Clear the signature.
-        scope.component.clearSignature = function() {
-          signaturePad.clear();
-          readSignature();
-        };
-
-        // Set some CSS properties.
-        element.css({
-          'border-radius': '4px',
-          'box-shadow': '0 0 5px rgba(0, 0, 0, 0.02) inset',
-          'border': '1px solid #f4f4f4'
-        });
-
-        function readSignature() {
-          if (scope.$parent.isRequired(scope.component) && signaturePad.isEmpty()) {
-            ngModel.$setViewValue('');
-          }
-          else {
-            ngModel.$setViewValue(signaturePad.toDataURL());
-          }
-        }
-
-        ngModel.$render = function() {
-          var dataUrl = ngModel.$viewValue || '';
-          signaturePad.fromDataURL(dataUrl);
-        };
-        signaturePad.onEnd = function() {
-          scope.$evalAsync(readSignature);
-        };
-      }
-    };
-  });
-  app.run([
-    '$templateCache',
-    'FormioUtils',
-    function($templateCache,
-              FormioUtils) {
-      $templateCache.put('formio/components/signature.html', FormioUtils.fieldWrap(
-        "<div ng-if=\"readOnly\">\n  <div ng-if=\"data[component.key] === 'YES'\">\n    [ Signature is hidden ]\n  </div>\n  <div ng-if=\"!data[component.key]\">\n    <div ng-style=\"{width: component.width, height: '150px', backgroundColor: component.backgroundColor, cursor: 'not-allowed'}\"></div>\n    <div class=\"formio-signature-footer\" style=\"text-align: center;color:#C3C3C3;\" ng-class=\"{'field-required': isRequired(component)}\">\n      {{ component.footer | formioTranslate:null:options.building }}\n      <formio-component-tooltip></formio-component-tooltip>\n    </div>\n  </div>\n  <div ng-if=\"data[component.key] && data[component.key] !== 'YES'\">\n    <img class=\"signature\" ng-attr-src=\"{{data[component.key]}}\" src=\"\" />\n  </div>\n</div>\n<div ng-if=\"!readOnly\" ng-style=\"{width: component.width, height: '100%'}\">\n  <a class=\"btn btn-xs btn-default\" style=\"position:absolute; left: 0; top: 0; z-index: 1000\" ng-click=\"component.clearSignature()\">\n    <span class=\"glyphicon glyphicon-refresh\"></span>\n  </a>\n  <canvas\n    signature\n    component=\"component\"\n    name=\"{{ componentId }}\"\n    ng-model=\"data[component.key]\"\n    ng-model-options=\"{allowInvalid: true}\"\n    tabindex=\"{{ component.tabindex || 0 }}\"\n    auto-focus=\"true\"\n    ng-required=\"isRequired(component)\"\n  ></canvas>\n  <div class=\"formio-signature-footer\" style=\"text-align: center;color:#C3C3C3;\" ng-class=\"{'field-required': isRequired(component)}\">\n    {{ component.footer | formioTranslate:null:options.building }}\n    <formio-component-tooltip></formio-component-tooltip>\n  </div>\n</div>\n"
-      ));
-
-      $templateCache.put('formio/componentsView/signature.html', FormioUtils.fieldWrap(
-        "<div ng-if=\"data[component.key] === 'YES'\">\n  [ Signature is hidden ]\n</div>\n<div ng-if=\"data[component.key] && (data[component.key] !== 'YES')\">\n  <img class=\"signature\" ng-attr-src=\"{{ data[component.key] }}\" src=\"\" />\n</div>\n<div class=\"well text-center\" ng-if=\"!data[component.key] || (data[component.key] === 'NO')\">\n  <strong>No signature provided</strong>\n</div>\n"
-      ));
-    }
-  ]);
-};
-
-},{"signature_pad":423}],461:[function(_dereq_,module,exports){
+},{}],452:[function(_dereq_,module,exports){
 "use strict";
 
 
@@ -102672,7 +100471,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],462:[function(_dereq_,module,exports){
+},{}],453:[function(_dereq_,module,exports){
 "use strict";
 
 
@@ -102734,7 +100533,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],463:[function(_dereq_,module,exports){
+},{}],454:[function(_dereq_,module,exports){
 "use strict";
 
 var GridUtils = _dereq_('../factories/GridUtils')();
@@ -102820,7 +100619,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":488}],464:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":479}],455:[function(_dereq_,module,exports){
 "use strict";
 
 module.exports = function(app) {
@@ -102961,7 +100760,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],465:[function(_dereq_,module,exports){
+},{}],456:[function(_dereq_,module,exports){
 "use strict";
 
 
@@ -103024,7 +100823,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],466:[function(_dereq_,module,exports){
+},{}],457:[function(_dereq_,module,exports){
 "use strict";
 
 var moment = _dereq_('moment');
@@ -103097,7 +100896,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"moment":416}],467:[function(_dereq_,module,exports){
+},{"moment":416}],458:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function (app) {
   app.config([
@@ -103191,7 +100990,7 @@ module.exports = function (app) {
     }
   ]);
 };
-},{}],468:[function(_dereq_,module,exports){
+},{}],459:[function(_dereq_,module,exports){
 "use strict";
 
 var GridUtils = _dereq_('../factories/GridUtils')();
@@ -103251,7 +101050,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":488}],469:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":479}],460:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -103329,7 +101128,7 @@ module.exports = function() {
   };
 };
 
-},{}],470:[function(_dereq_,module,exports){
+},{}],461:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -103897,7 +101696,7 @@ module.exports = function() {
   };
 };
 
-},{}],471:[function(_dereq_,module,exports){
+},{}],462:[function(_dereq_,module,exports){
 "use strict";
 module.exports = ['$sce', '$parse', '$compile', function($sce, $parse, $compile) {
   return {
@@ -103914,7 +101713,7 @@ module.exports = ['$sce', '$parse', '$compile', function($sce, $parse, $compile)
   };
 }];
 
-},{}],472:[function(_dereq_,module,exports){
+},{}],463:[function(_dereq_,module,exports){
 "use strict";
 var _get = _dereq_('lodash/get');
 var moment = _dereq_('moment');
@@ -104289,7 +102088,7 @@ module.exports = [
   }
 ];
 
-},{"lodash/get":369,"moment":416}],473:[function(_dereq_,module,exports){
+},{"lodash/get":369,"moment":416}],464:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -104305,7 +102104,7 @@ module.exports = function() {
   };
 };
 
-},{}],474:[function(_dereq_,module,exports){
+},{}],465:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   'formioComponents',
@@ -104378,7 +102177,7 @@ module.exports = [
   }
 ];
 
-},{}],475:[function(_dereq_,module,exports){
+},{}],466:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -104399,7 +102198,7 @@ module.exports = function() {
   };
 };
 
-},{}],476:[function(_dereq_,module,exports){
+},{}],467:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -104484,7 +102283,7 @@ module.exports = function() {
   };
 };
 
-},{}],477:[function(_dereq_,module,exports){
+},{}],468:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   '$compile',
@@ -104503,7 +102302,7 @@ module.exports = [
   }
 ];
 
-},{}],478:[function(_dereq_,module,exports){
+},{}],469:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -104513,7 +102312,7 @@ module.exports = function() {
   };
 };
 
-},{}],479:[function(_dereq_,module,exports){
+},{}],470:[function(_dereq_,module,exports){
 "use strict";
 var maskInput = _dereq_('vanilla-text-mask').default;
 var createNumberMask = _dereq_('text-mask-addons').createNumberMask;
@@ -104727,7 +102526,7 @@ module.exports = ['FormioUtils', function(FormioUtils) {
   };
 }];
 
-},{"formiojs/utils":188,"lodash":397,"text-mask-addons":425,"vanilla-text-mask":428}],480:[function(_dereq_,module,exports){
+},{"formiojs/utils":188,"lodash":397,"text-mask-addons":424,"vanilla-text-mask":427}],471:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -104754,7 +102553,7 @@ module.exports = function() {
     }
   };
 };
-},{}],481:[function(_dereq_,module,exports){
+},{}],472:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -104782,7 +102581,7 @@ module.exports = function() {
   };
 };
 
-},{}],482:[function(_dereq_,module,exports){
+},{}],473:[function(_dereq_,module,exports){
 "use strict";
 var _map = _dereq_('lodash/map');
 // Javascript editor directive
@@ -104858,7 +102657,7 @@ module.exports = ['FormioUtils', function(FormioUtils) {
   };
 }];
 
-},{"lodash/map":398}],483:[function(_dereq_,module,exports){
+},{"lodash/map":398}],474:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -104890,7 +102689,7 @@ module.exports = function() {
   };
 };
 
-},{}],484:[function(_dereq_,module,exports){
+},{}],475:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -104946,7 +102745,7 @@ module.exports = function() {
   };
 };
 
-},{}],485:[function(_dereq_,module,exports){
+},{}],476:[function(_dereq_,module,exports){
 "use strict";
 var isNaN = _dereq_('lodash/isNaN');
 var isFinite = _dereq_('lodash/isFinite');
@@ -105594,7 +103393,7 @@ module.exports = function() {
   };
 };
 
-},{"lodash/isEmpty":379,"lodash/isFinite":381,"lodash/isNaN":385}],486:[function(_dereq_,module,exports){
+},{"lodash/isEmpty":379,"lodash/isFinite":381,"lodash/isNaN":385}],477:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   'Formio',
@@ -105791,7 +103590,7 @@ module.exports = [
   }
 ];
 
-},{}],487:[function(_dereq_,module,exports){
+},{}],478:[function(_dereq_,module,exports){
 "use strict";
 var formioUtils = _dereq_('formiojs/utils').default;
 var conformToMask = _dereq_('vanilla-text-mask').conformToMask;
@@ -106283,7 +104082,7 @@ module.exports = function() {
   };
 };
 
-},{"formiojs/utils":188,"lodash/filter":366,"lodash/get":369,"vanilla-text-mask":428}],488:[function(_dereq_,module,exports){
+},{"formiojs/utils":188,"lodash/filter":366,"lodash/get":369,"vanilla-text-mask":427}],479:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   var generic = function(data, options) {
@@ -106410,7 +104209,7 @@ module.exports = function() {
   };
 };
 
-},{}],489:[function(_dereq_,module,exports){
+},{}],480:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   '$q',
@@ -106459,7 +104258,7 @@ module.exports = [
   }
 ];
 
-},{}],490:[function(_dereq_,module,exports){
+},{}],481:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   'Formio',
@@ -106505,7 +104304,7 @@ module.exports = [
   }
 ];
 
-},{}],491:[function(_dereq_,module,exports){
+},{}],482:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   'FormioUtils',
@@ -106514,7 +104313,7 @@ module.exports = [
   }
 ];
 
-},{}],492:[function(_dereq_,module,exports){
+},{}],483:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   '$sce',
@@ -106527,7 +104326,7 @@ module.exports = [
   }
 ];
 
-},{}],493:[function(_dereq_,module,exports){
+},{}],484:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
     return function(label, shortcut) {
@@ -106549,7 +104348,7 @@ module.exports = function() {
     };
   }
   
-},{}],494:[function(_dereq_,module,exports){
+},{}],485:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   function() {
@@ -106568,7 +104367,7 @@ module.exports = [
   }
 ];
 
-},{}],495:[function(_dereq_,module,exports){
+},{}],486:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   'formioTableView',
@@ -106581,7 +104380,7 @@ module.exports = [
   }
 ];
 
-},{}],496:[function(_dereq_,module,exports){
+},{}],487:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   'FormioUtils',
@@ -106596,7 +104395,7 @@ module.exports = [
   }
 ];
 
-},{}],497:[function(_dereq_,module,exports){
+},{}],488:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   '$filter',
@@ -106653,7 +104452,7 @@ module.exports = [
   }
 ];
 
-},{}],498:[function(_dereq_,module,exports){
+},{}],489:[function(_dereq_,module,exports){
 "use strict";
 module.exports = ['$sce', function($sce) {
   return function(val) {
@@ -106661,7 +104460,7 @@ module.exports = ['$sce', function($sce) {
   };
 }];
 
-},{}],499:[function(_dereq_,module,exports){
+},{}],490:[function(_dereq_,module,exports){
 "use strict";
 _dereq_('ui-select/dist/select');
 _dereq_('angular-moment');
@@ -106676,7 +104475,7 @@ _dereq_('ng-dialog');
 _dereq_('angular-ui-ace/src/ui-ace');
 _dereq_('./formio');
 
-},{"./formio":500,"angular-ckeditor-legacy":1,"angular-file-saver":2,"angular-moment":3,"angular-sanitize":5,"angular-ui-ace/src/ui-ace":6,"angular-ui-bootstrap":8,"bootstrap":12,"bootstrap-ui-datetime-picker/dist/datetime-picker":11,"ng-dialog":418,"ng-file-upload":420,"ui-select/dist/select":427}],500:[function(_dereq_,module,exports){
+},{"./formio":491,"angular-ckeditor-legacy":1,"angular-file-saver":2,"angular-moment":3,"angular-sanitize":5,"angular-ui-ace/src/ui-ace":6,"angular-ui-bootstrap":8,"bootstrap":12,"bootstrap-ui-datetime-picker/dist/datetime-picker":11,"ng-dialog":418,"ng-file-upload":420,"ui-select/dist/select":426}],491:[function(_dereq_,module,exports){
 "use strict";
 _dereq_('./polyfills/polyfills');
 
@@ -106842,7 +104641,7 @@ app.run([
 
 _dereq_('./components');
 
-},{"./components":448,"./directives/customValidator":469,"./directives/formio":470,"./directives/formioBindHtml.js":471,"./directives/formioComponent":472,"./directives/formioComponentTooltip":473,"./directives/formioComponentView":474,"./directives/formioCustomAttributes":475,"./directives/formioDelete":476,"./directives/formioElement":477,"./directives/formioErrors":478,"./directives/formioMask":479,"./directives/formioMax":480,"./directives/formioMin":481,"./directives/formioScriptEditor":482,"./directives/formioSubmission":483,"./directives/formioSubmissions":484,"./directives/formioWizard":485,"./factories/FormioScope":486,"./factories/FormioUtils":487,"./factories/formioInterceptor":489,"./factories/formioTableView":490,"./filters/flattenComponents":491,"./filters/safehtml":492,"./filters/shortcut":493,"./filters/tableComponents":494,"./filters/tableFieldView":495,"./filters/tableView":496,"./filters/translate":497,"./filters/trusturl":498,"./polyfills/polyfills":502,"./providers/Formio":503}],501:[function(_dereq_,module,exports){
+},{"./components":442,"./directives/customValidator":460,"./directives/formio":461,"./directives/formioBindHtml.js":462,"./directives/formioComponent":463,"./directives/formioComponentTooltip":464,"./directives/formioComponentView":465,"./directives/formioCustomAttributes":466,"./directives/formioDelete":467,"./directives/formioElement":468,"./directives/formioErrors":469,"./directives/formioMask":470,"./directives/formioMax":471,"./directives/formioMin":472,"./directives/formioScriptEditor":473,"./directives/formioSubmission":474,"./directives/formioSubmissions":475,"./directives/formioWizard":476,"./factories/FormioScope":477,"./factories/FormioUtils":478,"./factories/formioInterceptor":480,"./factories/formioTableView":481,"./filters/flattenComponents":482,"./filters/safehtml":483,"./filters/shortcut":484,"./filters/tableComponents":485,"./filters/tableFieldView":486,"./filters/tableView":487,"./filters/translate":488,"./filters/trusturl":489,"./polyfills/polyfills":493,"./providers/Formio":494}],492:[function(_dereq_,module,exports){
 "use strict";
 'use strict';
 
@@ -106873,13 +104672,13 @@ if (typeof Object.assign != 'function') {
   })();
 }
 
-},{}],502:[function(_dereq_,module,exports){
+},{}],493:[function(_dereq_,module,exports){
 "use strict";
 'use strict';
 
 _dereq_('./Object.assign');
 
-},{"./Object.assign":501}],503:[function(_dereq_,module,exports){
+},{"./Object.assign":492}],494:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   // The formio class.
@@ -106977,5 +104776,5 @@ module.exports = function() {
   };
 };
 
-},{"formiojs/Formio":34}]},{},[499])(499)
+},{"formiojs/Formio":34}]},{},[490])(490)
 });
