@@ -1,4 +1,4 @@
-/*! ng-formio v2.38.23 | https://unpkg.com/ng-formio@2.38.23/LICENSE.txt */
+/*! ng-formio v2.38.24 | https://unpkg.com/ng-formio@2.38.24/LICENSE.txt */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.formio = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(_dereq_,module,exports){
 (function (root, factory) {
   // AMD
@@ -111585,7 +111585,7 @@ module.exports = function (app) {
         '</div>'
       );
       $templateCache.put('formio/components/timeline.html',
-        "<swiper slides-per-view=\"3\">\n  <slides>\n    <slide ng-repeat=\"v in component.values track by $index\">\n      <div style=\"width: 100%\">\n        <span style=\"margin-top: 20px\" uib-tooltip=\"{{data[v.value].event || v.label}}\">{{data[v.value].event || v.label}}</span>\n        <div class=\"status\">\n          <span class=\"point\" ng-click=\"normalDialog(v.value,v.label)\" uib-tooltip=\"{{data[v.value].event || v.label}}\"></span>\n        </div>\n        <span style=\"margin-top: 20px\" uib-tooltip=\"{{data[v.value].event || v.label}}\">{{data[v.value].date.toDateString() || '______________________'}}</span>\n      </div>\n    </slide>\n\n  </slides>\n  <prev style=\"left:-3px;\" class=\"fa fa-angle-left\"></prev>\n  <next style=\"right: -8px\" class=\"fa fa-angle-right\"></next>\n  <!--<pagination></pagination>-->\n</swiper>\n"
+        "<swiper slides-per-view=\"3\">\n  <slides>\n    <slide ng-repeat=\"v in component.values track by $index\">\n      <div style=\"width: 100%\">\n        <span style=\"margin-top: 20px\" uib-tooltip=\"{{data[v.value].event || v.label}}\">{{data[v.value].event || v.label}}</span>\n        <div class=\"status\">\n          <span class=\"point\" ng-click=\"normalDialog(v.value,v.label)\" uib-tooltip=\"{{data[v.value].event || v.label}}\"></span>\n        </div>\n        <span style=\"margin-top: 20px\" uib-tooltip=\"{{data[v.value].event || v.label}}\">{{data[v.value].date || '______________________'}}</span>\n      </div>\n    </slide>\n\n  </slides>\n  <prev style=\"left:-3px;\" class=\"fa fa-angle-left\"></prev>\n  <next style=\"right: -8px\" class=\"fa fa-angle-right\"></next>\n  <!--<pagination></pagination>-->\n</swiper>\n"
       );
     }
   ]);
