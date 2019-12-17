@@ -41803,7 +41803,7 @@ module.exports = function(app) {
     '$templateCache',
     function($templateCache) {
       $templateCache.put('formio/components/address.html',
-        "<label ng-if=\"labelVisible() && (component.labelPosition !== 'bottom')\" for=\"{{ componentId }}\" ng-class=\"{'field-required': isRequired(component)}\" ng-style=\"getLabelStyles(component)\"\n       id=\"{{componentId+'Label'}}\">\n  {{ component.label | formioTranslate:null:options.building }}\n  <formio-component-tooltip></formio-component-tooltip>\n</label>\n<span ng-if=\"!component.label && isRequired(component)\" class=\"glyphicon glyphicon-asterisk form-control-feedback field-required-inline\" aria-hidden=\"true\"></span>\n<ui-select auto-focus=\"true\" ng-model=\"data[component.key]\" ng-model-options=\"{allowInvalid: true}\" safe-multiple-to-single ng-disabled=\"readOnly\" ng-required=\"isRequired(component)\" id=\"{{ componentId }}\" name=\"{{ componentId }}\" tabindex=\"{{ component.tabindex || 0 }}\"  aria-labelledby=\"{{ componentId +'Label'}}\"\n           aria-describedby=\"{{componentId + 'Desc'}}\" theme=\"bootstrap\" ng-style=\"getInputGroupStyles(component)\">\n  <ui-select-match class=\"ui-select-match\" placeholder=\"{{ component.placeholder | formioTranslate:null:options.building }}\">{{$item.formatted_address || $select.selected.formatted_address}}</ui-select-match>\n  <ui-select-choices class=\"ui-select-choices\" repeat=\"address in addresses\" refresh=\"refreshAddress($select.search)\" refresh-delay=\"500\">\n    <div ng-bind-html=\"address.formatted_address | highlight: $select.search\"></div>\n  </ui-select-choices>\n</ui-select>\n<label ng-if=\"labelVisible() && (component.labelPosition === 'bottom')\" for=\"{{ componentId }}\" ng-class=\"{'field-required': isRequired(component)}\" class=\"control-label--bottom\" id=\"{{componentId+'Desc'}}\">\n  {{ component.label | formioTranslate:null:options.building }}\n  <formio-component-tooltip></formio-component-tooltip>\n</label>\n<formio-errors ng-if=\"::!options.building\"></formio-errors>\n"
+        "<div\n  class=\"\nforms-intro\"\n  ng-if=\"\ncomponent.label && !component.hideLabel\"\n  for=\"\n{{ componentId }}\"\n  ng-class=\"\n{'field-required': component.validate.required}\"\n>\n  {{ component.label | formioTranslate }}\n</div>\n"
       );
 
       // Change the ui-select to ui-select multiple.
@@ -41839,7 +41839,7 @@ module.exports = function(app) {
           disableOnInvalid: false,
           theme: 'primary'
         },
-        controller: ['$scope', '$location', 'FormioUtils', function($scope, $location, FormioUtils) {
+        controller: ['$scope', '$location', 'FormioUtils', '$stateParams', 'dataService', function($scope, $location, FormioUtils, $stateParams, dataService) {
           if ($scope.options && $scope.options.building) return;
           var clicked = false;
           var settings = $scope.component;
@@ -41860,6 +41860,21 @@ module.exports = function(app) {
             }
           };
 
+          $scope.setDefault = function(){
+            $scope.$emit('SurveysetDefault');
+          }
+          //$scope.showNextButton = true;
+          console.log($scope.showNextButton )
+          if($scope.component.event === 'onStartSurvey' && dataService.obj.currentPage === 0){
+                $scope.showNextButton = false;
+                $scope.$emit('deleteOnStartSurvey');
+          }
+
+          if(dataService.obj.ongoing == false && $stateParams.isPDF === 'false'){
+              $scope.showme = true;
+              }else{
+              $scope.showme = false
+          }
           $scope.hasError = function() {
             if (clicked && (settings.action === 'submit') && $scope.formioForm.$invalid) {
               $scope.disableBtn = true;
@@ -42042,10 +42057,10 @@ module.exports = function(app) {
     }
   ]);
   app.run([
-    '$templateCache',
-    function($templateCache) {
+    '$templateCache', 'dataService',
+    function($templateCache, dataService) {
       $templateCache.put('formio/components/button.html',
-        "<button ng-attr-type=\"{{ getButtonType() }}\"\n    id=\"{{ componentId }}\"\n    name=\"{{ componentId }}\"\n    ng-class=\"{'btn-block': component.block, 'btn-disable': disableBtn}\"\n    auto-focus=\"true\"\n    class=\"btn btn-{{ component.theme }} btn-{{ component.size }}\"\n    ng-disabled=\"readOnly || formioForm.submitting || (component.disableOnInvalid && formioForm.$invalid)\"\n    tabindex=\"{{ component.tabindex || 0 }}\"\n    ng-click=\"$emit('buttonClick', component, componentId)\">\n  <span ng-if=\"component.leftIcon\" class=\"{{ component.leftIcon }}\" aria-hidden=\"true\"></span>\n  <span ng-if=\"component.leftIcon && component.label\">&nbsp;</span>{{ component.label | formioTranslate:null:options.building | shortcut:component.shortcut }}<span ng-if=\"component.rightIcon && component.label\">&nbsp;</span>\n  <span ng-if=\"component.rightIcon\" class=\"{{ component.rightIcon }}\" aria-hidden=\"true\"></span>\n  <formio-component-tooltip></formio-component-tooltip>\n  <i ng-if=\"component.action == 'submit' && formioForm.submitting\" class=\"glyphicon glyphicon-refresh glyphicon-spin\"></i>\n</button>\n<div ng-if=\"hasError()\" class=\"has-error\">\n  <p class=\"help-block\" onclick=\"scroll=window.scrollTo(0,0)\">\n    Please correct all errors before submitting.\n  </p>\n</div>\n"
+        "<div class=\"col-100 lb-1 lt-0-5 left\">\n  <div\n    class=\"col-80 push-10 text-center alert alert-submit\"\n    ng-if=\"readOnly || formioForm.submitting || (component.disableOnInvalid && formioForm.$invalid)\"\n  >\n    Um das Formular abzusenden füllen Sie bitte Alle Pflichtfragen in dieser\n    Sektion die mit einem rotem * versehen sind aus\n  </div>\n  <button\n    ng-attr-type=\"{{ getButtonType() }}\"\n    id=\"{{ componentId }}\"\n    name=\"{{ componentId }}\"\n    ng-class=\"{'btn-block': component.block}\"\n    class=\"mat-raised-button mat-primary right\"\n    ng-disabled=\"readOnly || formioForm.submitting || (component.disableOnInvalid && formioForm.$invalid)\"\n    tabindex=\"{{ component.tabindex || 0 }}\"\n    ng-click=\"$emit('buttonClick', component, componentId, showme=true)\"\n  >\n    <span\n      ng-if=\"component.leftIcon\"\n      class=\"{{ component.leftIcon }}\"\n      aria-hidden=\"true\"\n    ></span>\n    <span\n      ng-if=\"component.leftIcon && component.label\"\n      class=\"mat-button-wrapper\"\n      >&nbsp;</span\n    >{{ component.label | formioTranslate:null:builder }}<span\n      ng-if=\"component.rightIcon && component.label\"\n      >&nbsp;</span\n    >\n    <span\n      ng-if=\"component.rightIcon\"\n      class=\"{{ component.rightIcon }}\"\n      aria-hidden=\"true\"\n    ></span>\n    <i\n      ng-if=\"component.action == 'submit' && formioForm.submitting\"\n      class=\"glyphicon glyphicon-ok glyphicon-spin\"\n    ></i>\n  </button>\n</div>\n<div class=\"overlay\" ng-show=\"showme\">\n  <div class=\"col-inner col-50 push-25 lt-3 left\">\n    <div\n      class=\"col-100 lt-1 left lb-1\"\n      ng-if=\"!!component.description\"\n      class=\"input-description text-muted\"\n    >\n      <h3>{{ component.description }}</h3>\n      <h3>{{ component.thankyou }}</h3>\n      <!--<br><br><button type=\"button\" ng-click=\"setDefault()\" class=\"btn btn-default\" data-dismiss=\"modal\" >Fragebogen Zurücksetzen</button>\n-->\n\n      <br /><br /><button\n        type=\"button\"\n        ui-sref=\"dashboard.surveys\"\n        class=\"btn btn-negative\"\n      >\n        <h5 translate=\"menu_sidebar.6\"></h5>\n      </button>\n      <div class=\"checkmark-container\">\n        <svg\n          version=\"1.1\"\n          id=\"Layer_1\"\n          xmlns=\"http://www.w3.org/2000/svg\"\n          xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n          x=\"0px\"\n          y=\"0px\"\n          viewBox=\"0 0 98.5 98.5\"\n          enable-background=\"new 0 0 98.5 98.5\"\n          xml:space=\"preserve\"\n        >\n          <path\n            class=\"checkmark\"\n            fill=\"none\"\n            stroke-width=\"8\"\n            stroke-miterlimit=\"10\"\n            d=\"M81.7,17.8C73.5,9.3,62,4,49.2,4 C24.3,4,4,24.3,4,49.2s20.3,45.2,45.2,45.2s45.2-20.3,45.2-45.2c0-8.6-2.4-16.6-6.5-23.4l0,0L45.6,68.2L24.7,47.3\"\n          />\n        </svg>\n      </div>\n    </div>\n  </div>\n  <div class=\"emailshow\">\n    <p>{{ component.emailone }}</p>\n    <p>{{ component.emailtwo }}</p>\n    <p>{{ component.emailthree }}</p>\n    <p>{{ component.emailfour }}</p>\n    <p>{{ component.emailfive }}</p>\n    <p>{{ component.emailsix }}</p>\n  </div>\n</div>\n"
       );
 
       $templateCache.put('formio/componentsView/button.html',
@@ -44724,7 +44739,7 @@ module.exports = function(app) {
     'FormioUtils',
     function($templateCache, FormioUtils) {
       $templateCache.put('formio/components/radio.html', FormioUtils.fieldWrap(
-        "<ng-form name=\"{{ componentId }}\" ng-model=\"data[component.key]\" ng-model-options=\"{allowInvalid: true}\" custom-validator=\"component.validate.custom\">\n  <fieldset ng-if=\"component.fieldSet\">\n    <legend ng-if=\"component.label\">\n      {{ component.label }}\n      <formio-component-tooltip></formio-component-tooltip>\n    </legend>\n    <div ng-class=\"component.inline ? 'radio-inline' : 'radio'\" ng-repeat=\"v in component.values track by $index\">\n      <label class=\"control-label\" for=\"{{ componentId }}-{{ v.value }}\" id=\"{{ componentId +'-'+ v.value+'Label' }}\" ng-style=\"getOptionLabelStyles(component)\">\n        <span ng-if=\"topOrLeftOptionLabel(component)\">{{ v.label | formioTranslate:null:options.building }}</span>\n        <input\n          type=\"{{ component.inputType }}\"\n          id=\"{{ componentId }}-{{ v.value }}\"\n          value=\"{{ v.value }}\"\n          tabindex=\"{{ component.tabindex || 0 }}\"\n          ng-model=\"data[component.key]\"\n          ng-model-options=\"{allowInvalid: true}\"\n          aria-labelledby=\"{{componentId +'-'+ v.value+'Label'}}\"\n          ng-required=\"isRequired(component)\"\n          custom-validator=\"component.validate.custom\"\n          auto-focus=\"{{ $first }}\"\n          ng-disabled=\"readOnly\"\n          ng-style=\"getOptionInputStyles(component)\"\n          formio-custom-attributes=\"{{component.attributes}}\"\n        >\n        <span ng-if=\"!topOrLeftOptionLabel(component)\">{{ v.label | formioTranslate:null:options.building | shortcut:v.shortcut }}</span>\n      </label>\n    </div>\n  </fieldset>\n  <div ng-class=\"component.inline ? 'radio-inline' : 'radio'\" ng-repeat=\"v in component.values track by $index\"\n       ng-if=\"!component.fieldSet\">\n    <label class=\"control-label\" for=\"{{ componentId }}-{{ v.value }}\" id=\"{{ componentId +'-'+ v.value+'Label' }}\" ng-style=\"getOptionLabelStyles(component)\">\n      <span ng-if=\"topOrLeftOptionLabel(component)\">{{ v.label | formioTranslate:null:options.building }}</span>\n      <input\n        type=\"{{ component.inputType }}\"\n        id=\"{{ componentId }}-{{ v.value }}\"\n        value=\"{{ v.value }}\"\n        tabindex=\"{{ component.tabindex || 0 }}\"\n        aria-labelledby=\"{{componentId +'-'+ v.value+'Label'}}\"\n        ng-model=\"data[component.key]\"\n        ng-model-options=\"{allowInvalid: true}\"\n        auto-focus=\"{{ $first }}\"\n        ng-required=\"isRequired(component)\"\n        custom-validator=\"component.validate.custom\"\n        ng-disabled=\"readOnly\"\n        ng-style=\"getOptionInputStyles(component)\"\n        formio-custom-attributes=\"{{component.attributes}}\"\n      >\n      <span ng-if=\"!topOrLeftOptionLabel(component)\">{{ v.label | formioTranslate:null:options.building | shortcut:v.shortcut }}</span>\n    </label>\n  </div>\n</ng-form>\n"
+        "<div ng-class=\"'prevent-split lt-0-5 left'\">\n  <ng-form\n    name=\"{{ componentId }}\"\n    ng-model=\"data[component.key]\"\n    ng-required=\"isRequired(component)\"\n    custom-validator=\"component.validate.custom\"\n  >\n    <div\n      class=\"radio\"\n      ng-class=\"'col-100 left lb-0-2 def'\"\n      ng-repeat=\"v in component.values track by $index\"\n    >\n      <input\n        class=\"radio\"\n        name=\"{{ componentId }}\"\n        type=\"{{ component.inputType }}\"\n        id=\"{{ componentId }}-{{ v.value }}\"\n        value=\"{{ v.value }}\"\n        tabindex=\"{{ component.tabindex || 0 }}\"\n        ng-model=\"data[component.key]\"\n        ng-required=\"component.validate.required\"\n        ng-disabled=\"readOnly\"\n      />\n\n      <label for=\"{{ componentId }}-{{ v.value }}\">\n        {{ v.label | formioTranslate }}\n      </label>\n    </div></ng-form\n  >\n</div>\n"
       ));
     }
   ]);
@@ -44786,12 +44801,13 @@ module.exports = function (app) {
     'FormioUtils',
     function ($templateCache, FormioUtils) {
       $templateCache.put('formio/components/rangeslider.html', FormioUtils.fieldWrap(
-        "<div class=\"range-container\"\n>\n" +
+        "<div class=\"range-container-left\"\n>\n" +
         "<div class=\"range-hack\"\n>\n" +
         "<div class=\"range-col-50\"\n>\n {{ component.validate.min }} </div>\n" +
-        "<div class=\"range-col-50\"\n>\n <span class=\"pull-right\"\n>\n{{ component.validate.max }} </span>\n" +
+        "<div class=\"range-col-50\"\n>\n" +
+        "<span class=\"pull-right\"\n>\n{{ component.validate.max }} </span>\n" +
         "</div>\n" +
-        "<input\n type=\"range\"\n string-to-number\n class=\"form-control\"\n ng-model=\"data[component.key]\"\n  id=\"{{ componentId }}\"\n  name=\"{{ componentId }}\"\n  tabindex=\"{{ component.tabindex || 0 }}\"\n min=\"{{ component.validate.min }}\"\n  ng-disabled=\"readOnly\"\n  safe-multiple-to-single\n min=\"{{ component.validate.min }}\"\n  max=\"{{ component.validate.max }}\"\n step=\"{{ component.validate.step }}\"\n  ui-options=\"uiMaskOptions\"\n>\n" +
+        "<input\n type=\"range\"\n string-to-number\n class=\"form-control\"\n ng-model=\"data[component.key]\"\n  id=\"{{ componentId }}\"\n  name=\"{{ componentId }}\"\n tabindex=\"{{ component.tabindex || 0 }}\"\n min=\"{{ component.validate.min }}\"\n  ng-disabled=\"readOnly\"\n  safe-multiple-to-single\n min=\"{{ component.validate.min }}\"\n  max=\"{{ component.validate.max }}\"\n step=\"{{ component.validate.step }}\"\n  ui-options=\"uiMaskOptions\"\n>\n" +
         "<div ng-class=\"component.inline ? 'block-it' : 'none-it'\">\n" +
         "<div class=\"col-20-smiley left-it\"><div class=\"icon-sad-face-eyebrows\"></div>\n </div>\n" +
         "<div class=\"col-20-smiley center-it\"><div class=\"icon-sad-face\"></div>\n </div>\n" +
@@ -44799,7 +44815,9 @@ module.exports = function (app) {
         "<div class=\"col-20-smiley center-it\"><div class=\"icon-smiling-face\"></div>\n </div>\n" +
         "<div class=\"col-20-smiley right-it\"><div class=\"icon-laughing-face\"></div>\n </div>\n" +
         "</div>\n" +
+        "<div class=\"circle-container\"\n>\n" +
         "<input\n  type=\"text\"\n   class=\"form-control\"\n  id=\"{{ componentId }}\"\n  name=\"{{ componentId }}\"\n  tabindex=\"{{ component.tabindex || 0 }}\"\n  ng-model=\"data[component.key]\"\n   ng-disabled=\"readOnly\"\n  safe-multiple-to-single\n  min=\"{{ component.validate.min }}\"\n  max=\"{{ component.validate.max }}\"\n  step=\"{{ component.validate.step }}\"\n  placeholder=\"{{ component.placeholder | formioTranslate:null:builder }}\"\n  custom-validator=\"component.validate.custom\"\n  ui-mask=\"{{ component.inputMask }}\"\n  ui-mask-placeholder=\"\"\n  ui-options=\"uiMaskOptions\"\n>\n" +
+        "</div>\n" +
         "</div>\n" +
         "</div>\n"
       ));
@@ -45789,10 +45807,10 @@ module.exports = function(app) {
     '$templateCache',
     function($templateCache) {
       $templateCache.put('formio/components/selectboxes-directive.html',
-        "<div class=\"select-boxes\">\n  <div ng-class=\"component.inline ? 'checkbox-inline' : 'checkbox'\" ng-repeat=\"v in component.values track by $index\">\n    <label class=\"control-label\" for=\"{{ componentId }}-{{ v.value }}\" id=\"{{ componentId+'-'+v.value +'Label'}}\" ng-style=\"getOptionLabelStyles(component)\">\n      <span ng-if=\"topOrLeftOptionLabel(component)\">{{ v.label | formioTranslate:null:options.building }}</span>\n      <input type=\"checkbox\"\n        id=\"{{ componentId }}-{{ v.value }}\"\n        name=\"{{ componentId }}-{{ v.value }}\"\n        value=\"{{ v.value }}\"\n        tabindex=\"{{ component.tabindex || 0 }}\"\n        ng-disabled=\"readOnly\"\n        auto-focus=\"{{ $first }}\"\n        ng-click=\"toggleCheckbox(v.value)\"\n        ng-checked=\"model[v.value]\"\n         aria-labelledby=\"{{ componentId+'-'+v.value +'Label'}}\"\n        grid-row=\"gridRow\"\n        grid-col=\"gridCol\"\n        ng-style=\"getOptionInputStyles(component)\"\n      >\n      <span ng-if=\"!topOrLeftOptionLabel(component)\">{{ v.label | formioTranslate:null:options.building | shortcut:v.shortcut }}</span>\n    </label>\n  </div>\n</div>\n"
+        "<div class=\"\nselect-boxes lt-0-5 left\">\n  <div ng-class=\"\n'col-100 left lb-0-2 def'\" ng-repeat=\"\nv in component.values track by $index\">\n    <input type=\"\ncheckbox\" id=\"\n{{ componentId }}-{{ v.value }}\" name=\"\n{{ componentId }}-{{ v.value }}\" value=\"\n{{ v.value }}\" tabindex=\"\n{{ component.tabindex || 0 }}\" ng-disabled=\"\nreadOnly\" ng-click=\"\ntoggleCheckbox(v.value)\" ng-checked=\"\nmodel[v.value]\" grid-row=\"\ngridRow\" grid-col=\"\ngridCol\" />\n    <label for=\"\n{{ componentId }}-{{ v.value }}\">\n      {{ v.label | formioTranslate }}\n    </label>\n  </div>\n</div>"
       );
       $templateCache.put('formio/components/selectboxes.html',
-        "<fieldset ng-if=\"component.fieldSet\">\n  <legend ng-if=\"component.label\" class=\"select-boxes-legend\">\n    {{ component.label }}\n    <formio-component-tooltip></formio-component-tooltip>\n  </legend>\n  <div class=\"select-boxes\">\n    <formio-select-boxes\n      name=\"{{componentId}}\"\n      ng-model=\"data[component.key]\"\n      ng-model-options=\"{allowInvalid: true}\"\n      component=\"component\"\n      component-id=\"componentId\"\n      read-only=\"readOnly\"\n      aria-describedby=\"{{componentId + 'Desc'}}\"\n      ng-required=\"isRequired(component)\"\n      custom-validator=\"component.validate.custom\"\n      grid-row=\"gridRow\"\n      grid-col=\"gridCol\"\n      options=\"options\"\n      ng-style=\"getInputGroupStyles(component)\"\n    ></formio-select-boxes>\n    <div ng-if=\"!!component.description\" class=\"help-block\">\n      <span id=\"{{ componentId+'Desc'  }}\">{{ component.description }}</span>\n    </div>\n    <formio-errors ng-if=\"::!options.building\"></formio-errors>\n  </div>\n</fieldset>\n<div class=\"select-boxes\" ng-if=\"!component.fieldSet\">\n  <label ng-if=\"labelVisible() && (component.labelPosition !== 'bottom')\" for=\"{{ componentId }}\" class=\"control-label select-boxes-label\" id=\"{{ componentId+'Label' }}\" ng-class=\"{'field-required': isRequired(component)}\"\n         ng-style=\"getLabelStyles(component)\">\n    {{ component.label }}\n    <formio-component-tooltip></formio-component-tooltip>\n  </label>\n  <formio-select-boxes\n    name=\"{{componentId}}\"\n    ng-model=\"data[component.key]\"\n    ng-model-options=\"{allowInvalid: true}\"\n    component=\"component\"\n    component-id=\"componentId\"\n    read-only=\"readOnly\"\n    ng-required=\"isRequired(component)\"\n    custom-validator=\"component.validate.custom\"\n    aria-labelledby=\"{{ componentId +'Label'}}\"\n    aria-describedby=\"{{componentId + 'Desc'}}\"\n    grid-row=\"gridRow\"\n    grid-col=\"gridCol\"\n    options=\"options\"\n    ng-style=\"getInputGroupStyles(component)\"\n  ></formio-select-boxes>\n  <label ng-if=\"labelVisible() && (component.labelPosition === 'bottom')\" for=\"{{ componentId }}\" class=\"control-label control-label--bottom\" id=\"{{ componentId +'Desc'}}\"\n         ng-class=\"{'field-required': isRequired(component)}\">\n    {{ component.label }}\n    <formio-component-tooltip></formio-component-tooltip>\n  </label>\n  <div ng-if=\"!!component.description\" class=\"help-block\">\n    <span id=\"{{ componentId+'Desc' }}\">{{ component.description }}</span>\n  </div>\n  <formio-errors ng-if=\"::!options.building\"></formio-errors>\n</div>\n"
+        "<div class=\"select-boxes\">\n  <div\n    ng-if=\"component.label && !component.hideLabel\"\n    for=\"{{ componentId }}\"\n    class=\"default col-100 left lb-0-5\"\n    ng-class=\"{'field-required': component.validate.required}\"\n  >\n    {{ component.label }}\n  </div>\n  <formio-select-boxes\n    name=\"{{componentId}}\"\n    ng-model=\"data[component.key]\"\n    ng-model-options=\"{allowInvalid: true}\"\n    component=\"component\"\n    component-id=\"componentId\"\n    read-only=\"readOnly\"\n    ng-required=\"component.validate.required\"\n    custom-validator=\"component.validate.custom\"\n    grid-row=\"gridRow\"\n    grid-col=\"gridCol\"\n  ></formio-select-boxes>\n  <formio-errors></formio-errors>\n</div>\n"
       );
     }
   ]);
@@ -46347,7 +46365,7 @@ module.exports = function(app) {
       FormioUtils
     ) {
       $templateCache.put('formio/components/textfield.html', FormioUtils.fieldWrap(
-        "<input\n  type=\"{{ component.mask ? 'password' : component.inputType }}\"\n  class=\"form-control\"\n  id=\"{{ componentId }}\"\n  name=\"{{ componentId }}\"\n  tabindex=\"{{ component.tabindex || 0 }}\"\n  ng-disabled=\"readOnly\"\n  ng-model=\"data[component.key]\"\n  ng-model-options=\"{ allowInvalid: true, debounce: 500 }\"\n  safe-multiple-to-single\n  auto-focus=\"true\"\n  aria-labelledby=\"{{ componentId +'Label'}}\"\n  aria-describedby=\"{{componentId + 'Desc'}}\"\n  ng-required=\"isRequired(component)\"\n  spellcheck=\"{{ component.spellcheck }}\"\n  ng-minlength=\"component.validate.minLength\"\n  ng-maxlength=\"component.validate.maxLength\"\n  ng-pattern=\"component.validate.pattern\"\n  custom-validator=\"component.validate.custom\"\n  ng-attr-placeholder=\"{{ component.placeholder | formioTranslate:null:options.building }}\"\n  formio-mask\n  formio-custom-attributes=\"{{component.attributes}}\"\n>\n"
+        "<input\n  class=\"col-100\"\n  type=\"{{ component.mask ? 'password' : component.inputType }}\"\n  class=\"form-control\"\n  id=\"{{ componentId }}\"\n  name=\"{{ componentId }}\"\n  tabindex=\"{{ component.tabindex || 0 }}\"\n  ng-disabled=\"readOnly\"\n  ng-model=\"data[component.key]\"\n  ng-model-options=\"{ allowInvalid: true, debounce: 500 }\"\n  safe-multiple-to-single\n  auto-focus=\"true\"\n  aria-labelledby=\"{{ componentId +'Label'}}\"\n  aria-describedby=\"{{componentId + 'Desc'}}\"\n  ng-required=\"isRequired(component)\"\n  spellcheck=\"{{ component.spellcheck }}\"\n  ng-minlength=\"component.validate.minLength\"\n  ng-maxlength=\"component.validate.maxLength\"\n  ng-pattern=\"component.validate.pattern\"\n  custom-validator=\"component.validate.custom\"\n  ng-attr-placeholder=\"{{ component.placeholder | formioTranslate:null:options.building }}\"\n  formio-mask\n  formio-custom-attributes=\"{{component.attributes}}\"\n/>\n"
       ));
     }
   ]);
@@ -48338,6 +48356,11 @@ module.exports = function() {
       'FormioUtils',
       '$http',
       '$timeout',
+      '$localStorage',
+      'dataService',
+      'IsSaved',
+      '$rootScope',
+      '$stateParams',
       function(
         $scope,
         $compile,
@@ -48346,7 +48369,12 @@ module.exports = function() {
         FormioScope,
         FormioUtils,
         $http,
-        $timeout
+        $timeout,
+        $localStorage,
+        dataService,
+        IsSaved,
+        $rootScope,
+        $stateParams
       ) {
         $scope.options = $scope.options || {};
         Formio.setScopeBase($scope);
@@ -48381,542 +48409,478 @@ module.exports = function() {
           }
         };
 
-        var session = ($scope.storage && !$scope.readOnly) ? storage.getItem($scope.storage) : false;
+        var session = ($scope.storage && !$scope.readOnly) ? localStorage.getItem($scope.storage) : false;
+        if (session) {
+            session = angular.fromJson(session);
+        }
+        $scope.showNextButton = true;
+        //console.log($stateParams);
+        $scope.$on('isPDF', function (e) {
+           console.log(e)
+        });
+        if($stateParams.isPDF === 'true'){
+            console.log('lksdfjlaskfjaöslkfja'+$stateParams.isPDF)
+             $scope.isPDF = true;
+        }
+        if($stateParams.isPDF === 'false'){
+       //     console.log('lksdfjlaskfjaöslkfja'+$stateParams.isPDF)
+             $scope.isPDF = false;
+        }
+        //dataService.srcChange = false;
         $scope.formio = null;
         $scope.url = $scope.url || $scope.src;
         $scope.page = {};
-        $scope.activePage = {};
         $scope.pages = [];
-        $scope.history = [];
         $scope.hasTitles = false;
         $scope.colclass = '';
+
         if (!$scope.submission || !Object.keys($scope.submission).length) {
-          $scope.submission = session ? {data: session.data} : {data: {}};
+            // $scope.submission = session ? {data: session.data} : {data: {}};
         }
-        $scope.currentPage = session ? session.page : 0;
+        // console.log($scope.submission);
+        //$scope.currentPage = session ? session.page : 0;
+        $scope.cPage = [];
         $scope.formioAlerts = [];
-        $scope.formioOptions = $scope.formioOptions || {};
+        $scope.currentPage = dataService.obj.currentPage || 0;
+        console.log($scope.currentPage);
+        for (var i = 0;i<$scope.currentPage;++i){
+            $scope.cPage.push(i);
+           // console.log($scope.cPage)
+        }
 
         var getForm = function() {
-          var element = $element.find('#formio-wizard-form');
-          if (!element.length) {
-            return {};
-          }
-          return element.children().scope().formioForm;
+            var element = $element.find('#formio-wizard-form');
+            if (!element.length) {
+                return {};
+            }
+            return element.children().scope().formioForm;
         };
 
-        // Show the current page.
-        var showPage = function(scroll) {
-          // When allowing navigate on invsalid
-          // prev page alert can be visible.
-          // Let's clear it
-          $scope.currentPage = $scope.currentPage || 0;
-          $scope.showAlerts(null);
-          $scope.pageWasVisited[$scope.currentPage] = true;
+        $scope.submission.data = dataService.obj.submissionData;
+        $scope.surveyTitle = $scope.form.transTitle[$localStorage.lang]
+        $rootScope.$on('$translateChangeSuccess', function (event) {
+            $scope.surveyTitle = $scope.form.transTitle[$localStorage.lang]
+        })
 
-          $scope.wizardLoaded = false;
-          $scope.page.components = [];
-          $scope.page.components.length = 0;
-          $timeout(function() {
-            // If the page is past the components length, try to clear first.
-            if ($scope.currentPage >= $scope.pages.length) {
-              $scope.clear();
-            }
+        console.log($scope.form.transTitle[$localStorage.lang]);
+        dataService.obj.transTitle = $scope.form.transTitle[$localStorage.lang];
+        var showPage = function(scroll,zwischenspeichern) {
+            dataService.obj.transTitle = $scope.form.transTitle[$localStorage.lang];
+            $scope.wizardLoaded = false;
+            $scope.page.components = [];
+            $scope.page.components.length = 0;
+            $timeout(function() {
+                // If the page is past the components length, try to clear first.
+                if ($scope.currentPage >= $scope.pages.length) {
+                    $scope.clear();
+                }
+                /*if ($scope.storage && !$scope.readOnly) {
+                 localStorage.setItem($scope.storage, angular.toJson({
+                 page: $scope.currentPage,
+                 data: $scope.submission.data
+                 }));
+                 }*/
+                $scope.showCurrentSection =  $scope.form[$localStorage.lang][$scope.currentPage].title
+                $scope.page.components = $scope.pages[$scope.currentPage].components;
+                //console.log($scope.page.components)
+                $scope.formioAlerts = [];
+                if (scroll) {
+                    // window.scrollTo(0, $scope.wizardTop);
+                    $scope.$emit('scrollTop',scroll);
+                    //$location.hash('scrollTop1');
+                    //$anchorScroll();
+                }
+                $scope.wizardLoaded = true;
 
-            // Handle Local Storage Definition
-            if ($scope.storage && !$scope.readOnly) {
-              // If there is no localStorage object - make a new object schema
-              if (!storage.getItem($scope.storage)) {
-                storage.setItem($scope.storage, {
-                  page: $scope.currentPage,
-                  data: $scope.submission.data
-                });
-              }
+                // console.log($scope.pages.length)
 
-              // if there is a localStorage object && submission.data is blank then bind localStorage to $scope
-              if(storage.getItem($scope.storage) && isEmpty($scope.submission.data) == true){
-                $scope.submission.data = storage.getItem($scope.storage).data;
-              }
-
-              // if there is a localStorage object | && it is data | merge the two
-              if(storage.getItem($scope.storage) && isEmpty($scope.submission.data) == false){
-                storage.setItem($scope.storage, {
-                  page: $scope.currentPage,
-                  data: $scope.submission.data
-                });
-              }
-            }
+                $scope.$emit('wizardPage', $scope.currentPage,$scope.pages.length,$scope.submission.data);
+                $scope.submission.data = dataService.obj.submissionData;
+               $timeout($scope.$apply.bind($scope));
 
 
-            $scope.page.components = $scope.pages[$scope.currentPage].components;
-            $scope.activePage = $scope.pages[$scope.currentPage];
-            $scope.formioAlerts = [];
-            if (scroll) {
-              window.scrollTo(0, $scope.wizardTop);
-            }
-            $scope.wizardLoaded = true;
-            $scope.$emit('wizardPage', $scope.currentPage);
-            $timeout($scope.$apply.bind($scope));
-          });
+            });
+
         };
+
+        $rootScope.$on('$translateChangeSuccess', function (event) {
+            console.log($stateParams)
+            allPages=[];
+            setForm($scope.form)
+        });
 
         if (!$scope.form && $scope.src) {
-          (new Formio($scope.src, {base: $scope.baseUrl})).loadForm().then(function(form) {
-            $scope.form = form;
-            if (!$scope.wizardLoaded) {
-              showPage();
-            }
-          });
+            (new Formio($scope.src)).loadForm().then(function(form) {
+                form.components = form[$localStorage.lang];
+                $scope.form = form;
+                if (!$scope.wizardLoaded) {
+                    showPage();
+                }
+            })
         }
-
-        // We can be comming back with the 'prev' button.
-        // Wait for the form to be loaded.
-        // Then timeout to wait the loaded form to be rendered
-        // before checking for errors.
-        $scope.$on('formLoad', function() {
-          if ($scope.pageHasErrors[$scope.currentPage]) {
-            $timeout(function() {
-              $scope.checkErrors();
-            });
-          }
-        });
 
         // Shows the given alerts (single or array), and dismisses old alerts
         this.showAlerts = $scope.showAlerts = function(alerts) {
-          $scope.formioAlerts = [].concat(alerts);
+            $scope.formioAlerts = [].concat(alerts);
         };
 
         $scope.clear = function() {
-          if ($scope.storage && !$scope.readOnly) {
-            storage.setItem($scope.storage, '');
-          }
-          $scope.submission = {data: {}};
-          $scope.currentPage = 0;
-          $scope.history = [];
+            if ($scope.storage && !$scope.readOnly) {
+                //dataService.obj.submissionData = {};
+                $scope.submission.data = {};
+                dataService.obj.perc = "0";
+                dataService.obj.ongoing = true;
+                dataService.obj.currentPage = 0;
+                localStorage.setItem($scope.storage, '');
+            }
+            $scope.submission = {data: {}};
+            $scope.currentPage = 0;
         };
-
         // Check for errors.
         $scope.checkErrors = function() {
-          if (!$scope.isValid()) {
-            // Change all of the fields to not be pristine.
-            angular.forEach($element.find('[name="formioForm"]').find('*'), function(element) {
-              var elementScope = angular.element(element).scope();
-              if (!elementScope || !elementScope.component) {
-                return;
-              }
-              var fieldForm = elementScope.formioForm;
-              if (!fieldForm) {
-                return;
-              }
-              if (fieldForm[elementScope.component.key]) {
-                fieldForm[elementScope.component.key].$pristine = false;
-              }
-            });
-            $scope.formioAlerts = [{
-              type: 'danger',
-              message: 'Please fix the following errors before proceeding.'
-            }];
-            return true;
-          }
-          return false;
+            if (!$scope.isValid()) {
+                // Change all of the fields to not be pristine.
+                angular.forEach($element.find('[name="formioForm"]').find('*'), function(element) {
+                    var elementScope = angular.element(element).scope();
+                    if (!elementScope || !elementScope.component) {
+                        return;
+                    }
+                    var fieldForm = elementScope.formioForm;
+                    if (!fieldForm) {
+                        return;
+                    }
+                    if (fieldForm[elementScope.component.key]) {
+                        fieldForm[elementScope.component.key].$pristine = false;
+                    }
+                });
+                $scope.formioAlerts = [{
+                    type: 'danger',
+                    message: 'Bitte füllen Sie alle Pflichtfelder die mit einem "*" gekenntzeichnet sind aus um fortzufahren.'
+                }];
+                return true;
+            }
+            return false;
         };
-
         // Submit the submission.
         $scope.submit = function() {
-          if ($scope.checkErrors()) {
-            return;
-          }
-
-          // We want to submit, but free navigation is enabled.
-          // Lets check if previous pages where not visited or has errors.
-          // If find one, stop searching, go to that page and do not continue with the submission.
-          if ($scope.formioOptions.wizardFreeNavigation) {
-            var backToPage = null;
-            for (var i = 0; i < $scope.pages.length; i++) {
-              if ($scope.pageHasErrors[i] || !$scope.pageWasVisited[i]) {
-                backToPage = i;
-                break;
-              }
+            if ($scope.checkErrors()) {
+                return;
             }
-            if (backToPage !== null) {
-              return $scope.goto(backToPage);
-            }
-          }
-
-          FormioUtils.alter('submit', $scope, $scope.submission, function(err) {
-            if (err) {
-              return this.showAlerts(err.alerts);
-            }
-
             // Create a sanitized submission object.
             var submissionData = {data: {}};
             if ($scope.submission._id) {
-              submissionData._id = $scope.submission._id;
+                submissionData._id = $scope.submission._id;
             }
             if ($scope.submission.data._id) {
-              submissionData._id = $scope.submission.data._id;
+                submissionData._id = $scope.submission.data._id;
             }
-
             var grabIds = function(input) {
-              if (!input) {
-                return [];
-              }
-
-              if (!(input instanceof Array)) {
-                input = [input];
-              }
-
-              var final = [];
-              input.forEach(function(element) {
-                if (element && element._id) {
-                  final.push(element._id);
+                if (!input) {
+                    return [];
                 }
-              });
+                if (!(input instanceof Array)) {
+                    input = [input];
+                }
 
-              return final;
+                var final = [];
+                input.forEach(function(element) {
+                    if (element && element._id) {
+                        final.push(element._id);
+                    }
+                });
+
+                return final;
             };
 
             var defaultPermissions = {};
             FormioUtils.eachComponent($scope.form.components, function(component) {
-              if (component.type === 'resource' && component.key && component.defaultPermission) {
-                defaultPermissions[component.key] = component.defaultPermission;
-              }
-              if (submissionData.data.hasOwnProperty(component.key) && (component.type === 'number')) {
-                var value = $scope.submission.data[component.key];
-                if (component.type === 'number') {
-                  submissionData.data[component.key] = value ? parseFloat(value) : 0;
+                if (component.type === 'resource' && component.key && component.defaultPermission) {
+                    defaultPermissions[component.key] = component.defaultPermission;
                 }
-                else {
-                  submissionData.data[component.key] = value;
+                if (submissionData.data.hasOwnProperty(component.key) && (component.type === 'number')) {
+                    var value = $scope.submission.data[component.key];
+                    if (component.type === 'number') {
+                        submissionData.data[component.key] = value ? parseFloat(value) : 0;
+                    }
+                    else {
+                        submissionData.data[component.key] = value;
+                    }
                 }
-              }
             }, true);
 
             angular.forEach($scope.submission.data, function(value, key) {
-              submissionData.data[key] = value;
+                submissionData.data[key] = value;
 
-              // Setup the submission access.
-              var perm = defaultPermissions[key];
-              if (perm) {
-                submissionData.access = submissionData.access || [];
+                // Setup the submission access.
+                var perm = defaultPermissions[key];
+                if (perm) {
+                    submissionData.access = submissionData.access || [];
 
-                // Coerce value into an array for plucking.
-                if (!(value instanceof Array)) {
-                  value = [value];
+                    // Coerce value into an array for plucking.
+                    if (!(value instanceof Array)) {
+                        value = [value];
+                    }
+
+                    // Try to find and update an existing permission.
+                    var found = false;
+                    submissionData.access.forEach(function(permission) {
+                        if (permission.type === perm) {
+                            found = true;
+                            permission.resources = permission.resources || [];
+                            permission.resources.concat(grabIds(value));
+                        }
+                    });
+
+                    // Add a permission, because one was not found.
+                    if (!found) {
+                        submissionData.access.push({
+                            type: perm,
+                            resources: grabIds(value)
+                        });
+                    }
                 }
-
-                // Try to find and update an existing permission.
-                var found = false;
-                submissionData.access.forEach(function(permission) {
-                  if (permission.type === perm) {
-                    found = true;
-                    permission.resources = permission.resources || [];
-                    permission.resources.concat(grabIds(value));
-                  }
-                });
-
-                // Add a permission, because one was not found.
-                if (!found) {
-                  submissionData.access.push({
-                    type: perm,
-                    resources: grabIds(value)
-                  });
-                }
-              }
             });
             // Strip out any angular keys.
             submissionData = angular.copy(submissionData);
 
             var submitEvent = $scope.$emit('formSubmit', submissionData);
             if (submitEvent.defaultPrevented) {
-              // Listener wants to cancel the form submission
-              return;
+                // Listener wants to cancel the form submission
+                return;
             }
 
             var onDone = function(submission) {
-              if ($scope.storage && !$scope.readOnly) {
-                storage.setItem($scope.storage, '');
-              }
-              $scope.showAlerts({
-                type: 'success',
-                message: 'Submission Complete!'
-              });
-              $scope.$emit('formSubmission', submission);
+                if ($scope.storage && !$scope.readOnly) {
+                    localStorage.setItem($scope.storage, '');
+                }
+                $scope.showAlerts({
+                    type: 'success',
+                    message: 'Submission Complete!'
+                });
+                $scope.$emit('formSubmission', submission);
             };
 
             // Save to specified action.
             if ($scope.action) {
-              var method = submissionData._id ? 'put' : 'post';
-              $http[method]($scope.action, submissionData).then(function(submission) {
-                Formio.clearCache();
-                onDone(submission);
-              }, FormioScope.onError($scope, $element));
+                var method = submissionData._id ? 'put' : 'post';
+                $http[method]($scope.action, submissionData).then(function(submission) {
+                    Formio.clearCache();
+                    onDone(submission);
+                }, FormioScope.onError($scope, $element));
             }
             else if ($scope.formio && !$scope.formio.noSubmit) {
-              $scope.formio.saveSubmission(submissionData).then(onDone).catch(FormioScope.onError($scope, $element));
+                $scope.formio.saveSubmission(submissionData).then(onDone).catch(FormioScope.onError($scope, $element));
             }
             else {
-              onDone(submissionData);
+                onDone(submissionData);
             }
-          }.bind(this));
         };
-
+        $scope.$on('SurveysetDefault',function(event){
+            $scope.cancel();
+        })
         $scope.cancel = function() {
-          if(confirm('Are you sure you want to cancel?')){
             $scope.clear();
-            FormioUtils.alter('cancel', $scope, function(err) {
-              if (err) {
-                return this.showAlerts(err.alerts);
-              }
-              showPage(true);
-              $scope.$emit('cancel');
-            }.bind(this));
-          }
-          else {
-            return;
-          }
+            showPage(true);
+            $scope.$emit('cancel');
         };
+        $scope.$on('onStartSurvey',function (event) {
+            $scope.showNextButton = true;
+            $scope.next();
+        })
+        $scope.$on('deleteOnStartSurvey',function (event) {
+            $scope.showNextButton = false;
 
-        $scope.pageHasErrors = {};
-        $scope.pageWasVisited = {};
-
-        $scope.getPageByKey = function(key) {
-          var pageIndex = 0;
-          angular.forEach($scope.pages, function(page, index) {
-            if (page.key === key) {
-              pageIndex = index;
-              return false;
-            }
-          });
-          return pageIndex;
-        };
-
-        /* eslint-disable max-depth */
-        $scope.getNextPage = function() {
-          var nextPage = $scope.currentPage;
-          nextPage++;
-          var currentPage = $scope.pages[$scope.currentPage];
-          if (currentPage.nextPage) {
-            var page = 0;
-            // Allow for script execution.
-            if (typeof currentPage.nextPage === 'string') {
-              try {
-                var next = nextPage;
-                eval('(function(data) {' + currentPage.nextPage.toString() + '})($scope.submission.data)');
-                page = next;
-                if (!isNaN(parseInt(page, 10)) && isFinite(page)) {
-                  return page;
-                }
-                if (typeof page !== 'string') {
-                  return page;
-                }
-
-                // Assume they passed back the key of the page to go to.
-                return $scope.getPageByKey(page);
-              }
-              catch (e) {
-                /* eslint-disable no-console */
-                console.warn('An error occurred in a custom nextPage function statement for component ' + $scope.page.key, e);
-                /* eslint-enable no-console */
-                return page;
-              }
-            }
-            // Or use JSON Logic.
-            else {
-              var result = FormioUtils.jsonLogic.apply(currentPage.nextPage, {
-                data: $scope.submission.data,
-                page: page,
-                form: $scope.page
-              });
-              var newPage = parseInt(result, 10);
-              if (!isNaN(parseInt(newPage, 10)) && isFinite(newPage)) {
-                return newPage;
-              }
-
-              return $scope.getPageByKey(result);
-            }
-          }
-          return nextPage;
-        };
-        /* eslint-enable max-depth */
+        })
 
         // Move onto the next page.
         $scope.next = function() {
-          var errors = $scope.checkErrors();
-          if (errors) {
-            $scope.$emit('formError');
-            $scope.pageHasErrors[$scope.currentPage] = true;
-            if (!$scope.formioOptions.wizardFreeNavigation) {
-              return;
-            }
-          }
-          else {
-            $scope.pageHasErrors[$scope.currentPage] = false;
-          }
 
-          // Get the next page.
-          var nextPage = $scope.getNextPage();
-          if (nextPage >= $scope.pages.length) {
-            nextPage = $scope.pages.length - 1;
-          }
-          if (nextPage < 0) {
-            nextPage = 0;
-          }
-
-          $scope.history.push($scope.currentPage);
-          $scope.currentPage = nextPage;
-          FormioUtils.alter('nextPage', $scope, function(err) {
-            if (err) {
-              return this.showAlerts(err.alerts);
+            if ($scope.checkErrors()) {
+                return;
             }
+            if ($scope.currentPage >= ($scope.pages.length - 1)) {
+                return;
+            }
+
+            if($scope.currentPage == $scope.cPage.length){
+            $scope.cPage.push( $scope.currentPage);
+
+            }
+            $scope.currentPage++;
             showPage(true);
-            $scope.$emit('wizardNext', $scope.currentPage);
-          }.bind(this));
+            dataService.obj.submissionData = $scope.submission.data
+            //console.log($scope.submission)
+            $scope.$emit('wizardNext', $scope.currentPage,$scope.submission);
+
+
+        };
+        // Save Function when trigger Next Button
+        $scope.speichern = function(currentSave) {
+            IsSaved.save = currentSave
+
+            dataService.obj.submissionData = $scope.submission.data;
+
+            $scope.$emit('wizardPage', $scope.currentPage,$scope.pages.length,$scope.submission.data);
+           // showPage(true,true);
+            $scope.$emit('wizardNext', $scope.currentPage,$scope.submission);
+            console.log($scope.currentPage);
+
+
         };
 
         // Move onto the previous page.
         $scope.prev = function() {
-          // var errors = $scope.checkErrors();
-          $scope.pageHasErrors[$scope.currentPage] = false;
-          var prev = $scope.history.pop();
-          $scope.currentPage = prev;
-          FormioUtils.alter('prevPage', $scope, function(err) {
-            if (err) {
-              return this.showAlerts(err.alerts);
+
+            if ($scope.currentPage < 1) {
+                return ;
             }
+
+            $scope.currentPage--;
             showPage(true);
-            $scope.$emit('wizardPrev', $scope.currentPage);
-          }.bind(this));
+            dataService.obj.submissionData = $scope.submission.data
+            $scope.$emit('wizardPrev', $scope.currentPage,$scope.submission);
+
         };
 
         $scope.goto = function(page) {
-          if (page < 0) {
-            return;
-          }
-          if (page >= $scope.pages.length) {
-            return;
-          }
-          var errors = $scope.checkErrors();
-          $scope.pageHasErrors[$scope.currentPage] = errors;
-          $scope.currentPage = page;
-          showPage(true);
+            if (page < 0) {
+                return;
+            }
+            if (page >= $scope.pages.length) {
+                return;
+            }
+
+            $scope.currentPage = page;
+            if($scope.currentPage !== 0){
+                $scope.showNextButton = true;
+            }
+
+            showPage(true);
         };
 
         $scope.isValid = function() {
-          return getForm().$valid;
+            return getForm().$valid;
         };
 
         $scope.$on('wizardGoToPage', function(event, page) {
-          $scope.goto(page);
+            $scope.goto(page);
         });
 
         var updatePages = function() {
-          if ($scope.pages.length > 6) {
-            $scope.margin = ((1 - ($scope.pages.length * 0.0833333333)) / 2) * 100;
-            $scope.colclass = 'col-sm-1';
-          }
-          else {
-            $scope.margin = ((1 - ($scope.pages.length * 0.1666666667)) / 2) * 100;
-            $scope.colclass = 'col-sm-2';
-          }
+            if ($scope.pages.length > 6) {
+                $scope.margin = ((1 - ($scope.pages.length * 0.0833333333)) / 2) * 100;
+                $scope.colclass = 'col-sm-1';
+            }
+            else {
+                $scope.margin = ((1 - ($scope.pages.length * 0.1666666667)) / 2) * 100;
+                $scope.colclass = 'col-sm-2';
+            }
         };
 
         var allPages = [];
         var hasConditionalPages = false;
         var setForm = function(form) {
-          $scope.pages = [];
-          angular.forEach(form.components, function(component) {
-            // Only include panels for the pages.
-            if (component.type === 'panel') {
-              if (!$scope.hasTitles && component.title) {
-                $scope.hasTitles = true;
-              }
-              if (FormioUtils.hasCondition(component)) {
-                hasConditionalPages = true;
-              }
-              // Make sure this page is not in the hide compoenents array.
-              if (
-                ($scope.hideComponents) &&
-                (component.key) &&
-                ($scope.hideComponents.indexOf(component.key) !== -1)
-              ) {
-                return;
-              }
-              allPages.push(component);
-              $scope.pages.push(component);
-            }
-          });
+            form.components = form[$localStorage.lang];
+            $scope.pages = [];
+            angular.forEach(form.components, function(component) {
+                // Only include panels for the pages.
+                if (component.type === 'panel') {
+                    if (!$scope.hasTitles && component.title) {
+                        $scope.hasTitles = true;
+                    }
+                    if (component.customConditional) {
+                        hasConditionalPages = true;
+                    }
+                    else if (component.conditional && component.conditional.when) {
+                        hasConditionalPages = true;
+                    }
+                    // Make sure this page is not in the hide compoenents array.
 
-          // FOR-71
-          if (!$scope.options.building) {
-            $scope.$watch('submission.data', function(data) {
-              if (hasConditionalPages) {
-                var newPages = [];
-                angular.forEach(allPages, function(page) {
-                  if (FormioUtils.isVisible(page, null, data)) {
-                    newPages.push(page);
-                  }
-                });
-                $scope.pages = newPages;
-                updatePages();
-                setTimeout($scope.$apply.bind($scope), 10);
-              }
+                    if ((component.key) && ($scope.hideComponents) && ($scope.hideComponents.indexOf(component.key) !== -1)) {
 
-              // Calculate values for hidden fields outside of wizard.
-              angular.forEach(form.components, function(component) {
-                if (component.type !== 'panel') {
-                  FormioUtils.checkCalculated(component, $scope.submission, $scope.submission.data);
+                        return;
+                    }
+                    allPages.push(component);
+                    $scope.pages.push(component);
                 }
-              });
-            }, true);
-          }
+            });
+            // var formioUtils = _dereq_('formiojs/utils');
+            // FOR-71dataService.GetSurveyCMS($stateParams.surveyTitle).then(function (res) {
+            dataService.GetSurveyCMS($stateParams.surveyTitle).then(function (res) {
+                if(res){
+                    // $scope.submission.data = res.survey
+                    // dataService.obj.submissionData = res.survey
 
-          $scope.form = $scope.form ? angular.merge($scope.form, angular.copy(form)) : angular.copy(form);
-          $scope.page = angular.copy(form);
-          $scope.page.display = 'form';
-          $scope.$emit('wizardFormLoad', form);
-          updatePages();
-          showPage();
+                    $scope.currentPage = parseInt(res.tags[2]) || 0;
+                    //console.log($scope.currentUser)
+                    if($localStorage.currentUser.email === 'pashalis.naoumis@gmail.com'){
+                        $scope.currentPage = 0;
+                        console.log($scope.currentPage)
+                    }
+
+                }
+                //console.log($scope.submission.data)
+            })
+
+            if (!$scope.builder && hasConditionalPages) {
+                $scope.$watch('submission.data', function(data) {
+                    var newPages = [];
+                    angular.forEach(allPages, function(page) {
+                        if (FormioUtils.isVisible(page, null, data)) {
+                              console.log(page);
+                            newPages.push(page);
+                        }
+                    });
+
+                    $scope.pages = newPages;
+                    updatePages();
+                    setTimeout($scope.$apply.bind($scope), 10);
+                }, true);
+            }
+
+            $scope.form = $scope.form ? angular.merge($scope.form, angular.copy(form)) : angular.copy(form);
+            $scope.page = angular.copy(form);
+            $scope.page.display = 'form';
+            $scope.$emit('wizardFormLoad', form);
+            updatePages();
+            showPage();
         };
 
         // FOR-71
-        if (!$scope.options.building) {
-          $scope.$watch('form', function(form) {
-            if (
-              $scope.src ||
-              !form ||
-              !Object.keys(form).length ||
-              !form.components ||
-              !form.components.length
-            ) {
-              return;
-            }
-            var formUrl = form.project ? '/project/' + form.project : '';
-            formUrl += '/form/' + form._id;
-            $scope.formio = new Formio(formUrl, {base: $scope.baseUrl});
-            if ($scope.url) {
-              $scope.formio.noSubmit = true;
-            }
-            setForm(form);
-          });
+        if (!$scope.builder) {
+            $scope.$watch('form', function(form) {
+                if (
+                    $scope.src ||
+                    !form ||
+                    !Object.keys(form).length ||
+                    !form.components ||
+                    !form.components.length
+                ) {
+                    return;
+                }
+                var formUrl = form.project ? '/project/' + form.project : '';
+                formUrl += '/form/' + form._id;
+                $scope.formio = new Formio(formUrl);
+                setForm(form);
+            });
         }
+
+
 
         // When the components length changes update the pages.
         $scope.$watch('form.components.length', updatePages);
 
         // Load the form.
         if ($scope.src) {
-          $scope.formio = new Formio($scope.src, {base: $scope.baseUrl});
-          $scope.formio.loadForm().then(function(form) {
-            setForm(form);
-          });
+            $scope.formio = new Formio($scope.src);
+            $scope.formio.loadForm().then(function(form) {
+                form.components = form[$localStorage.lang];
+                setForm(form);
+            });
         }
         else {
-          $scope.src = '';
-          $scope.formio = new Formio($scope.src, {base: $scope.baseUrl});
-          if ($scope.url) {
-            $scope.formio.noSubmit = true;
-          }
+            $scope.src = '';
+            $scope.formio = new Formio($scope.src);
         }
       }
     ]
@@ -48929,10 +48893,12 @@ module.exports = [
   'Formio',
   'formioComponents',
   '$timeout',
+  'dataService',
   function(
     Formio,
     formioComponents,
-    $timeout
+    $timeout,
+    dataService
   ) {
     return {
       onError: function($scope, $element) {
@@ -48969,6 +48935,16 @@ module.exports = [
         $scope.formLoading = true;
         $scope.form = angular.isDefined($scope.form) ? $scope.form : {};
         $scope.submission = angular.isDefined($scope.submission) ? $scope.submission : {data: {}};
+
+        dataService.GetSurveyCMS(dataService.obj.title).then(function (res) {
+          if(res && $scope.submission && Object.keys($scope.submission.data).length == 0){
+              if(res.survey){
+
+                  // $scope.submission = {data:res.survey};
+                  dataService.obj.id = res.id;
+              }
+          }
+        });
         $scope.submissions = angular.isDefined($scope.submissions) ? $scope.submissions : [];
 
         // Keep track of the elements rendered.
@@ -49127,7 +49103,7 @@ var conformToMask = _dereq_('vanilla-text-mask').conformToMask;
 var _filter = _dereq_('lodash/filter');
 var _get = _dereq_('lodash/get');
 
-module.exports = function() {
+module.exports = function(dataService) {
   var hooks = {};
 
   function optionsLabelOnTheTopOrBottom(position) {
@@ -49459,6 +49435,9 @@ module.exports = function() {
         return false;
       }
 
+      var copyData = angular.copy(data);
+      dataService.obj.$scope.$emit('onVisible', copyData);
+      
       return this.checkVisible(component, row, data);
     },
     flattenComponents: formioUtils.flattenComponents,
@@ -50116,28 +50095,28 @@ app.run([
 
     // The template for the formio forms.
     $templateCache.put('formio.html',
-      "<div>\n  <i style=\"font-size: 2em;\" ng-if=\"formLoading\" ng-class=\"{'formio-hidden': !formLoading}\" class=\"formio-loading glyphicon glyphicon-refresh glyphicon-spin\"></i>\n  <formio-wizard ng-if=\"form.display === 'wizard'\" src=\"src\" url=\"url\" form=\"form\" submission=\"submission\" form-action=\"formAction\" read-only=\"readOnly\" hide-components=\"hideComponents\" disable-components=\"disableComponents\" formio-options=\"formioOptions\" storage=\"form.name\" options=\"options\"></formio-wizard>\n  <div ng-if=\"form.display === 'pdf' && form.settings.pdf\" style=\"position:relative;\">\n    <div ng-repeat=\"alert in formioAlerts track by $index\" class=\"alert alert-{{ alert.type }}\" role=\"alert\" ng-if=\"::!options.building\">\n      {{ alert.message | formioTranslate:null:options.building }}\n    </div>\n    <span style=\"position:absolute;right:10px;top:10px;cursor:pointer;\" class=\"btn btn-default no-disable\" ng-click=\"zoomIn()\"><span class=\"glyphicon glyphicon-zoom-in\"></span></span>\n    <span style=\"position:absolute;right:10px;top:60px;cursor:pointer;\" class=\"btn btn-default no-disable\" ng-click=\"zoomOut()\"><span class=\"glyphicon glyphicon-zoom-out\"></span></span>\n    <a ng-if=\"downloadUrl\" style=\"position:absolute;right:10px;top:110px;cursor:pointer;\" class=\"no-disable\" href=\"{{ downloadUrl | trustAsResourceUrl }}\" target=\"_blank\"><img ng-src=\"{{ pdfImage }}\" style=\"width:3em;\" /></a>\n    <iframe ng-src=\"{{ getIframeSrc(form.settings.pdf) | trustAsResourceUrl }}\" seamless class=\"formio-iframe\"></iframe>\n    <button ng-if=\"!readOnly && !options.building\" type=\"button\" class=\"btn btn-primary\" ng-click=\"submitIFrameForm()\">Submit</button>\n  </div>\n  <form ng-if=\"!form.display || (form.display === 'form')\" role=\"form\" name=\"{{ formName }}\" class=\"formio-form\" ng-submit=\"onSubmit(formioForm)\" novalidate>\n    <div ng-repeat=\"alert in formioAlerts track by $index\" class=\"alert alert-{{ alert.type }}\" role=\"alert\" ng-if=\"::!options.building\">\n      {{ alert.message | formioTranslate:null:options.building }}\n    </div>\n    <a ng-if=\"downloadUrl && form.settings.pdf.id\" class=\"pull-right no-disable\" href=\"{{ downloadUrl | trustAsResourceUrl }}\" target=\"_blank\"><img ng-src=\"{{ pdfImage }}\" style=\"width:3em;\" /></a>\n    <!-- DO NOT PUT \"track by $index\" HERE SINCE DYNAMICALLY ADDING/REMOVING COMPONENTS WILL BREAK -->\n    <formio-component\n      ng-repeat=\"component in form.components track by $index\"\n      component=\"component\"\n      ng-if=\"options.building ? '::true' : isVisible(component)\"\n      data=\"submission.data\"\n      form-name=\"formName\"\n      formio=\"formio\"\n      submission=\"submission\"\n      hide-components=\"hideComponents\"\n      read-only=\"isDisabled(component, submission.data)\"\n      options=\"options\"\n    ></formio-component>\n  </form>\n</div>\n"
+      "<div>\n  <div\n    ng-if=\"formLoading\"\n    ng-class=\"{'formio-hidden': !formLoading}\"\n    class=\"formio-loading\"\n  >\n    <div class=\"smiley-load\">\n      <div class=\"loader-load\"></div>\n      <div class=\"dot-loeft\"></div>\n      <div class=\"dot-right\"></div>\n    </div>\n  </div>\n\n  <div\n    ng-repeat=\"alert in formioAlerts track by $index\"\n    class=\"alert alert-{{ alert.type }}\"\n    role=\"alert\"\n  >\n    {{ alert.message | formioTranslate:null:builder }}\n  </div>\n\n  <formio-wizard\n    ng-if=\"form.display === 'wizard'\"\n    src=\"src\"\n    form=\"form\"\n    submission=\"submission\"\n    form-action=\"formAction\"\n    read-only=\"readOnly\"\n    hide-components=\"hideComponents\"\n    disable-components=\"disableComponents\"\n    formio-options=\"formioOptions\"\n    storage=\"form.name\"\n  ></formio-wizard>\n\n  <div\n    ng-if=\"form.display === 'pdf' && form.settings.pdf\"\n    style=\"position:relative;\"\n  >\n    <span\n      style=\"position:absolute;right:10px;top:10px;cursor:pointer;\"\n      class=\"btn btn-default no-disable\"\n      ng-click=\"zoomIn()\"\n      ><spann class=\"glyphicon glyphicon-zoom-in\"></spann\n    ></span>\n\n    <span\n      style=\"position:absolute;right:10px;top:60px;cursor:pointer;\"\n      class=\"btn btn-default no-disable\"\n      ng-click=\"zoomOut()\"\n      ><span class=\"glyphicon glyphicon-zoom-out\"></span\n    ></span>\n\n    <a\n      ng-if=\"downloadUrl\"\n      style=\"position:absolute;right:10px;top:110px;cursor:pointer;\"\n      class=\"btn btn-primary no-disable\"\n      href=\"{{ downloadUrl | trustAsResourceUrl }}\"\n      target=\"_blank\"\n    >\n      <span class=\"glyphicon glyphicon-cloud-download\"></span\n    ></a>\n    <iframe\n      src=\"{{ getIframeSrc(form.settings.pdf) | trustAsResourceUrl }}\"\n      seamless\n      class=\"formio-iframe\"\n    ></iframe>\n\n    <button\n      ng-if=\"!readOnly && !form.builder\"\n      type=\"button\"\n      class=\"btn btn-primary\"\n      ng-click=\"submitIFrameForm()\"\n    >\n      Submit\n    </button>\n  </div>\n  <form\n    ng-if=\"!form.display || (form.display === 'form')\"\n    role=\"form\"\n    name=\"formioForm\"\n    ng-submit=\"onSubmit(formioForm)\"\n    novalidate\n  >\n    <div\n      ng-repeat=\"alert in formioAlerts track by $index\"\n      class=\"alert alert-{{ alert.type }}\"\n      role=\"alert\"\n      ng-if=\"::!builder\"\n    >\n      {{ alert.message | formioTranslate:null:builder }}\n    </div>\n    <!-- DO NOT PUT \"track by $index\" HERE SINCE DYNAMICALLY ADDING/REMOVING COMPONENTS WILL BREAK -->\n\n    <formio-component\n      ng-repeat=\"component in form.components track by $index\"\n      component=\"component\"\n      ng-if=\"builder ? '::true' : isVisible(component)\"\n      data=\"submission.data\"\n      formio-form=\"formioForm\"\n      formio=\"formio\"\n      submission=\"submission\"\n      hide-components=\"hideComponents\"\n      read-only=\"isDisabled(component, submission.data)\"\n      builder=\"builder\"\n    ></formio-component>\n  </form>\n</div>\n"
     );
 
     $templateCache.put('formio-wizard.html',
-      "<div class=\"formio-wizard-wrapper\">\n  <div class=\"row bs-wizard\" style=\"border-bottom:0;\" ng-class=\"{hasTitles: hasTitles}\" ng-if=\"activePage.breadcrumb !== 'none'\">\n    <div ng-class=\"{disabled: ($index > currentPage) && !formioOptions.wizardFreeNavigation, active: ($index == currentPage), complete: ($index < currentPage), noTitle: !page.title}\" class=\"{{ colclass }} bs-wizard-step\" ng-repeat=\"page in pages track by $index\">\n      <div class=\"bs-wizard-stepnum-wrapper\">\n        <div class=\"text-center bs-wizard-stepnum\" ng-if=\"page.title\">{{ page.title }}</div>\n      </div>\n      <div class=\"progress\"><div class=\"progress-bar progress-bar-primary\"></div></div>\n      <a ng-click=\"goto($index)\" class=\"bs-wizard-dot bg-primary\"><div class=\"bs-wizard-dot-inner\"\n        ng-class=\"{\n          'bg-success': !pageHasErrors[$index],\n          'bg-danger': pageHasErrors[$index],\n          'bg-warning': !pageWasVisited[$index] && currentPage > $index\n        }\"></div></a>\n    </div>\n  </div>\n  <style type=\"text/css\">.bs-wizard > .bs-wizard-step:first-child { margin-left: {{ margin }}%; }</style>\n  <i ng-show=\"!wizardLoaded\" id=\"formio-loading\" style=\"font-size: 2em;\" class=\"glyphicon glyphicon-refresh glyphicon-spin\"></i>\n  <div ng-repeat=\"alert in formioAlerts track by $index\" class=\"alert alert-{{ alert.type }}\" role=\"alert\">{{ alert.message | formioTranslate:null:options.building }}</div>\n  <div class=\"formio-wizard\">\n    <formio\n      ng-if=\"wizardLoaded\"\n      submission=\"submission\"\n      form=\"page\"\n      url=\"url\"\n      read-only=\"readOnly\"\n      hide-components=\"hideComponents\"\n      disable-components=\"disableComponents\"\n      formio-options=\"formioOptions\"\n      id=\"formio-wizard-form\"\n      options=\"options\"\n    ></formio>\n  </div>\n  <ul ng-show=\"wizardLoaded\" class=\"list-inline\">\n    <li><a class=\"btn btn-default formio-wizard-button-cancel\" ng-click=\"cancel()\">Cancel</a></li>\n    <li ng-if=\"currentPage > 0\"><a class=\"btn btn-primary formio-wizard-button-previous\" ng-click=\"prev()\">Previous</a></li>\n    <li ng-if=\"currentPage < (pages.length - 1)\">\n      <a class=\"btn btn-primary formio-wizard-button-next\" ng-click=\"next()\">Next</a>\n    </li>\n    <li ng-if=\"currentPage >= (pages.length - 1)\">\n      <a class=\"btn btn-primary formio-wizard-button-submit\" ng-click=\"submit()\">Submit Form</a>\n    </li>\n  </ul>\n</div>\n"
+      "<div class=\"col-center\">\n\n  <div class=\"scrollmenu-bg\"></div>\n\n  <div class=\"scrollmenu-wrapper\">\n    <ul class=\"scrollmenu\">\n      <div class=\"col-100 col-inner-lw-2 left lb-0-5 lt-0-5\">\n        <div ng-repeat=\"page in pages track by $index\">\n          <div class=\"medi-survey col-60 left headline-top showpagetwo\"\n            ng-class=\"{active: ($index == currentPage), complete: ($index == currentPage), noTitle: !page.title}\"\n            ng-if=\"page.title\">\n            {{surveyTitle}} </div>\n\n        </div>\n\n        <div class=\"col-40 left\">\n          <button class=\"mat-icon-button-small right survey-desktop-none\"\n            ng-click=\"layer2.areaStatus = !layer2.areaStatus\"> <span class=\"mat-button-wrapper\">\n              <div class=\"mat-icon\"> <i class=\"fa fa-list-ul\" aria-hidden=\"true\"> </i>\n              </div>\n            </span>\n          </button>\n\n\n          <button class=\"mat-icon-button-small right\" ng-click=\"speichern(true)\"\n            uib-tooltip=\"{{ 'survey.6' | translate }}\" tooltip-placement=\"left\"> <span class=\"mat-button-wrapper\">\n              <div class=\"mat-icon\"> <i class=\"fa fa-floppy-o\" aria-hidden=\"true\"> </i>\n              </div>\n            </span>\n          </button>\n\n\n          <button class=\"mat-icon-button-small right\" data-toggle=\"modal\" data-target=\"#resetModal\"\n            uib-tooltip=\"{{ 'diary.118' | translate }}\" tooltip-placement=\"left\"> <span class=\"mat-button-wrapper\">\n              <div class=\"mat-icon\"> <i class=\"fa fa-undo\" aria-hidden=\"true\"> </i>\n              </div>\n            </span>\n          </button>\n\n\n        </div>\n\n      </div>\n\n    </ul>\n\n    <div ng-class=\"{'outside' : layer2.areaStatus, 'inside' : !layer2.areaStatus}\">\n\n      <div class=\"control-card-wrap-second\">\n\n        <div class=\"section-wrapper default\">\n          <div class=\"row bs-wizard\" style=\"border-bottom:0;\" ng-class=\"{hasTitles: hasTitles}\">\n\n            <div class=\"section-link-wrapper\" ng-repeat=\"page in pages track by $index\">\n              <div class=\"col-100 left\">\n                <div ng-show=\"($index > cPage.length) == true\">\n                  <div class=\"disable-wrapper\"></div>\n                </div>\n                <button\n                  ng-class=\"{active: ($index == currentPage), complete: ($index == currentPage), noTitle: !page.title}\"\n                  class=\"section-link-button lb-0-5 lt-0-5\" ng-if=\"page.title\"\n                  ng-click=\"goto($index); layer2.areaStatus = !layer2.areaStatus\">\n                  {{ page.title | formioTranslate }} </button>\n              </div>\n            </div>\n\n          </div>\n\n        </div>\n\n      </div>\n\n      <style type=\"text/css\">\n        .bs-wizard>.bs-wizard-step:first-child {\n          margin-left: {\n              {\n              margin\n            }\n          }\n\n          %;\n        }\n      </style>\n    </div>\n\n    <div class=\"control-card-wrap-survey survey-mobile-none\">\n      <div class=\"control-card-survey\">\n        <div class=\"section-link-wrapper\" ng-repeat=\"page in pages track by $index\">\n          <div class=\"col-100 left\">\n            <div ng-show=\"($index > cPage.length) == true\">\n              <div class=\"disable-wrapper\"></div>\n            </div>\n            <button\n              ng-class=\"{active: ($index == currentPage), complete: ($index == currentPage), noTitle: !page.title}\"\n              class=\"section-link-button lb-0-5 lt-0-5\" ng-if=\"page.title\"\n              ng-click=\"goto($index); layer2.areaStatus = !layer2.areaStatus\">\n              {{ page.title | formioTranslate }} </button>\n          </div>\n        </div>\n\n      </div>\n\n    </div>\n\n  </div>\n\n  <div ng-show=\"!wizardLoaded\" id=\"formio-loading\" style=\"font-size: 2em;\" class=\"formio-loading\">\n    <div class=\"smiley-load\">\n      <div class=\"loader-load\">\n      </div>\n      <div class=\"dot-left\">\n      </div>\n      <div class=\"dot-right\">\n      </div>\n    </div>\n  </div>\n\n  <div ng-repeat=\"alert in formioAlerts track by $index\" class=\"classname alert alert-{{ alert.type }}\" role=\"alert\">\n    {{ alert.message }}</div>\n\n  <div ng-if=\"isPDF\">\n    <div class=\"formio-wizard\" ng-repeat='page1 in pages'>\n      <formio ng-if=\"wizardLoaded\" submission=\"submission\" form=\"page1\" url=\"url\" read-only=\"readOnly\"\n        hide-components=\"hideComponents\" disable-components=\"disableComponents\" formio-options=\"formioOptions\"\n        id=\"formio-wizard-form\"></formio>\n\n    </div>\n  </div>\n  <div ng-if=\"!isPDF\" class=\"formio-wizard\">\n    <formio ng-if=\"wizardLoaded\" submission=\"submission\" form=\"page\" url=\"url\" read-only=\"readOnly\"\n      hide-components=\"hideComponents\" disable-components=\"disableComponents\" formio-options=\"formioOptions\"\n      id=\"formio-wizard-form\"></formio>\n\n  </div>\n  <ul ng-show=\"wizardLoaded\" class=\"list-inline\">\n    <div class=\"modal fade\" id=\"resetModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"resetModalLabel\"\n      aria-hidden=\"true\">\n      <div class=\"modal-dialog\">\n        <div class=\"modal-content\">\n          <div class=\"modal-header\"> <button type=\"button\" class=\"close\" data-dismiss=\"modal\"\n              aria-hidden=\"true\">×</button>\n            <h2 class=\"modal-title\" id=\"myModalLabel\" translate=\"diary.117\"></h2>\n          </div>\n          <div class=\"modal-footer\"> <button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\"\n              translate=\"diary.2\"></button> <button type=\"button\" ng-click=\"cancel()\" class=\"btn btn-default\"\n              data-dismiss=\"modal\" translate=\"diary.1\"></button> </div>\n        </div>\n      </div>\n    </div>\n\n\n    <div ng-if=\"currentPage < (form.components.length - 1)\">\n\n      <div class=\"row pdf-none\">\n        <div class=\"col-100 col-inner-lw-2 lb-1 lt-0-5 left\">\n          <div ng-if=\"showNextButton\">\n            <div ng-if=\"currentPage < (pages.length - 1)\">\n              <a class=\"mat-raised-button mat-primary right\" ng-click=\"next()\"><span class=\"mat-button-wrapper\"\n                  translate=\"diary.126\"></span>\n              </a>\n            </div>\n\n          </div>\n\n          <div ng-if=\"currentPage > 0\"><a class=\"mat-raised-button mat-primary right\" ng-click=\"prev()\"><span\n                class=\"mat-button-wrapper\" translate=\"survey.10\"></span>\n            </a></div>\n\n        </div>\n      </div>\n    </div>\n  </ul>\n</div>"
     );
 
     $templateCache.put('formio-delete.html',
-      "<form role=\"form\">\n  <div ng-repeat=\"alert in formioAlerts track by $index\" class=\"alert alert-{{ alert.type }}\" role=\"alert\">\n    {{ alert.message | formioTranslate:null:options.building }}\n  </div>\n  <h3>{{ deleteMessage | formioTranslate:null:options.building }}</h3>\n  <div class=\"btn-toolbar\">\n    <button ng-click=\"onDelete()\" class=\"btn btn-danger\">{{ 'Yes' | formioTranslate:null:options.building }}</button>\n    <button ng-click=\"onCancel()\" class=\"btn btn-default\">{{ 'No' | formioTranslate:null:options.building }}</button>\n  </div>\n</form>\n"
+      "<form role=\"form\">\n  <div\n    ng-repeat=\"alert in formioAlerts track by $index\"\n    class=\"alert alert-{{ alert.type }}\"\n    role=\"alert\"\n  >\n    {{ alert.message | formioTranslate:null:builder }}\n  </div>\n  <h3>{{ deleteMessage | formioTranslate:null:builder }}</h3>\n  <div class=\"btn-toolbar\">\n    <button ng-click=\"onDelete()\" class=\"btn btn-danger\">\n      {{ 'Yes' | formioTranslate:null:builder }}\n    </button>\n    <button ng-click=\"onCancel()\" class=\"btn btn-default\">\n      {{ 'No' | formioTranslate:null:builder }}\n    </button>\n  </div>\n</form>\n"
     );
 
     $templateCache.put('formio/submission.html',
-      "<div>\n  <div ng-repeat=\"component in form.components track by $index\" ng-if=\"submission && submission.data\">\n    <formio-component-view\n      form=\"form\"\n      component=\"component\"\n      data=\"submission.data\"\n      ignore=\"ignore\"\n      submission=\"submission\"\n      ng-if=\"options.building ? '::true' : isVisible(component)\"\n      options=\"options\"\n    ></formio-component-view>\n  </div>\n</div>\n"
+      "<div>\n  <div\n    ng-repeat=\"component in form.components track by $index\"\n    ng-if=\"submission && submission.data\"\n  >\n    <formio-component-view\n      form=\"form\"\n      component=\"component\"\n      data=\"submission.data\"\n      ignore=\"ignore\"\n      submission=\"submission\"\n      ng-if=\"builder ? '::true' : isVisible(component)\"\n      builder=\"builder\"\n    ></formio-component-view>\n  </div>\n</div>\n"
     );
 
     $templateCache.put('formio/submissions.html',
-      "<div>\n  <div ng-repeat=\"alert in formioAlerts track by $index\" class=\"alert alert-{{ alert.type }}\" role=\"alert\">\n    {{ alert.message | formioTranslate:null:options.building }}\n  </div>\n  <table class=\"table\">\n    <thead>\n      <tr>\n        <th ng-repeat=\"component in form.components | flattenComponents track by $index\" ng-if=\"tableView(component)\">{{ component.label || component.key }}</th>\n        <th>Submitted</th>\n        <th>Updated</th>\n        <th>Operations</th>\n      </tr>\n    </thead>\n    <tbody>\n      <tr ng-repeat=\"submission in submissions track by $index\" class=\"formio-submission\" ng-click=\"$emit('submissionView', submission)\">\n        <td ng-repeat=\"component in form.components | flattenComponents track by $index\" ng-if=\"tableView(component)\">{{ submission.data | tableView:component }}</td>\n        <td>{{ submission.created | amDateFormat:'l, h:mm:ss a' }}</td>\n        <td>{{ submission.modified | amDateFormat:'l, h:mm:ss a' }}</td>\n        <td>\n          <div class=\"button-group\" style=\"display:flex;\">\n            <a ng-click=\"$emit('submissionView', submission); $event.stopPropagation();\" class=\"btn btn-primary btn-xs\"><span class=\"glyphicon glyphicon-eye-open\"></span></a>&nbsp;\n            <a ng-click=\"$emit('submissionEdit', submission); $event.stopPropagation();\" class=\"btn btn-default btn-xs\"><span class=\"glyphicon glyphicon-edit\"></span></a>&nbsp;\n            <a ng-click=\"$emit('submissionDelete', submission); $event.stopPropagation();\" class=\"btn btn-danger btn-xs\"><span class=\"glyphicon glyphicon-remove-circle\"></span></a>\n          </div>\n        </td>\n      </tr>\n    </tbody>\n  </table>\n  <pagination\n    ng-if=\"submissions.serverCount > perPage\"\n    ng-model=\"currentPage\"\n    ng-model-options=\"{allowInvalid: true}\"\n    ng-change=\"pageChanged(currentPage)\"\n    total-items=\"submissions.serverCount\"\n    items-per-page=\"perPage\"\n    direction-links=\"false\"\n    boundary-links=\"true\"\n    first-text=\"&laquo;\"\n    last-text=\"&raquo;\"\n  >\n  </pagination>\n</div>\n"
+      "<div>\n  <div\n    ng-repeat=\"alert in formioAlerts track by $index\"\n    class=\"alert alert-{{ alert.type }}\"\n    role=\"alert\"\n  >\n    {{ alert.message | formioTranslate:null:builder }}\n  </div>\n  <table class=\"table\">\n    <thead>\n      <tr>\n        <th\n          ng-repeat=\"component in form.components | flattenComponents track by $index\"\n          ng-if=\"tableView(component)\"\n        >\n          {{ component.label || component.key }}\n        </th>\n        <th>Submitted</th>\n        <th>Updated</th>\n        <th>Operations</th>\n      </tr>\n    </thead>\n    <tbody>\n      <tr\n        ng-repeat=\"submission in submissions track by $index\"\n        class=\"formio-submission\"\n        ng-click=\"$emit('submissionView', submission)\"\n      >\n        <td\n          ng-repeat=\"component in form.components | flattenComponents track by $index\"\n          ng-if=\"tableView(component)\"\n        >\n          {{ submission.data | tableView:component }}\n        </td>\n        <td>{{ submission.created | amDateFormat:'l, h:mm:ss a' }}</td>\n        <td>{{ submission.modified | amDateFormat:'l, h:mm:ss a' }}</td>\n        <td>\n          <div class=\"button-group\" style=\"display:flex;\">\n            <a\n              ng-click=\"$emit('submissionView', submission); $event.stopPropagation();\"\n              class=\"btn btn-primary btn-xs\"\n              ><span class=\"glyphicon glyphicon-eye-open\"></span></a\n            >&nbsp;\n            <a\n              ng-click=\"$emit('submissionEdit', submission); $event.stopPropagation();\"\n              class=\"btn btn-default btn-xs\"\n              ><span class=\"glyphicon glyphicon-edit\"></span></a\n            >&nbsp;\n            <a\n              ng-click=\"$emit('submissionDelete', submission); $event.stopPropagation();\"\n              class=\"btn btn-danger btn-xs\"\n              ><span class=\"glyphicon glyphicon-remove-circle\"></span\n            ></a>\n          </div>\n        </td>\n      </tr>\n    </tbody>\n  </table>\n  <pagination\n    ng-if=\"submissions.serverCount > perPage\"\n    ng-model=\"currentPage\"\n    ng-change=\"pageChanged(currentPage)\"\n    total-items=\"submissions.serverCount\"\n    items-per-page=\"perPage\"\n    direction-links=\"false\"\n    boundary-links=\"true\"\n    first-text=\"&laquo;\"\n    last-text=\"&raquo;\"\n  >\n  </pagination>\n</div>\n"
     );
 
     // A formio component template.
     $templateCache.put('formio/component.html',
-      "<div class=\"form-group form-field-type-{{ component.type }} formio-component-{{ component.key }} {{component.customClass}}\" id=\"form-group-{{ componentId }}\"\n     ng-class=\"{'has-feedback ': (component.hideLabel === true || component.label === '' || !component.label) && component.validate.required,\n             'has-error': (formioForm[componentId].$invalid || invalidQuestions(formioForm)) && !formioForm[componentId].$pristine && component.type !== 'form' }\"\n     ng-style=\"component.style\"\n     ng-hide=\"component.hidden\">\n  <formio-element></formio-element>\n</div>\n\n"
+      "<div\n  class=\"prevent-split form-field-type-{{ component.type }} formio-component-{{ component.key }} {{component.customClass}}\"\n  id=\"form-group-{{ componentId }}\"\n  ng-class=\"{'has-feedback ': (component.hideLabel === true || component.label === '' || !component.label) && component.validate.required,\n            'has-error': formioForm[componentId].$invalid && !formioForm[componentId].$pristine }\"\n  ng-style=\"component.style\"\n  ng-hide=\"component.hidden\"\n>\n  <formio-element></formio-element>\n</div>\n"
     );
 
     $templateCache.put('formio/component-view.html',
@@ -50149,7 +50128,7 @@ app.run([
     );
 
     $templateCache.put('formio/errors.html',
-      "<div ng-show=\"formioForm[componentId].$error && !formioForm[componentId].$pristine\">\n  <div ng-show=\"component.validate.customMessage && (\n    formioForm[componentId].$error.email ||\n    formioForm[componentId].$error.required ||\n    formioForm[componentId].$error.number ||\n    formioForm[componentId].$error.maxlength ||\n    formioForm[componentId].$error.minlength ||\n    formioForm[componentId].$error.maxItems ||\n    formioForm[componentId].$error.minItems ||\n    formioForm[componentId].$error.min ||\n    formioForm[componentId].$error.max ||\n    formioForm[componentId].$error.custom ||\n    formioForm[componentId].$error.pattern ||\n    formioForm[componentId].$error.day ||\n    formioForm[componentId].$error.mask\n  )\">\n    <p class=\"help-block\">{{ component.validate.customMessage | formioTranslate:null:options.building }}</p>\n  </div>\n  <div ng-hide=\"component.validate.customMessage\">\n    <p class=\"help-block\" ng-show=\"formioForm[componentId].$error.email\">{{ component.errorLabel || component.label || component.placeholder || component.key }} {{'must be a valid email' | formioTranslate:null:options.building}}.</p>\n    <p class=\"help-block\" ng-show=\"formioForm[componentId].$error.required\">{{ component.errorLabel || component.label || component.placeholder || component.key }} {{'is required' | formioTranslate:null:options.building}}.</p>\n    <p class=\"help-block\" ng-show=\"formioForm[componentId].$error.number\">{{ component.errorLabel || component.label || component.placeholder || component.key }} {{'must be a number' | formioTranslate:null:options.building}}.</p>\n    <p class=\"help-block\" ng-show=\"formioForm[componentId].$error.maxlength\">{{ component.errorLabel || component.label || component.placeholder || component.key }} {{'must be shorter than' | formioTranslate:null:options.building}} {{ component.validate.maxLength + 1 }} {{'characters' | formioTranslate:null:options.building}}.</p>\n    <p class=\"help-block\" ng-show=\"formioForm[componentId].$error.minlength\">{{ component.errorLabel || component.label || component.placeholder || component.key }} {{'must be longer than' | formioTranslate:null:options.building}} {{ component.validate.minLength - 1 }} {{'characters' | formioTranslate:null:options.building}}.</p>\n    <p class=\"help-block\" ng-show=\"formioForm[componentId].$error.maxItems\">{{ component.errorLabel || component.label || component.placeholder || component.key }} {{'max items allowed: ' | formioTranslate:null:options.building}} {{ component.validate.maxItems }}.</p>\n    <p class=\"help-block\" ng-show=\"formioForm[componentId].$error.minItems\">{{ component.errorLabel || component.label || component.placeholder || component.key }} {{'min items required: ' | formioTranslate:null:options.building}} {{ component.validate.minItems }}.</p>\n    <p class=\"help-block\" ng-show=\"formioForm[componentId].$error.min\">{{ component.errorLabel || component.label || component.placeholder || component.key }} {{'must be greater than or equal to' | formioTranslate:null:options.building}} {{ component.validate.min }}.</p>\n    <p class=\"help-block\" ng-show=\"formioForm[componentId].$error.max\">{{ component.errorLabel || component.label || component.placeholder || component.key }} {{'must be less than or equal to' | formioTranslate:null:options.building}} {{ component.validate.max }}.</p>\n    <p class=\"help-block\" ng-show=\"formioForm[componentId].$error.custom\">{{ component.customError | formioTranslate }}</p>\n    <p class=\"help-block\" ng-show=\"formioForm[componentId].$error.pattern\">{{ component.errorLabel || component.label || component.placeholder || component.key }} {{'does not match the pattern' | formioTranslate:null:options.building}} {{ component.validate.pattern }}</p>\n    <p class=\"help-block\" ng-show=\"formioForm[componentId].$error.day\">{{ component.errorLabel || component.label || component.placeholder || component.key }} {{'must be a valid date' | formioTranslate:null:options.building}}.</p>\n    <p class=\"help-block\" ng-show=\"formioForm[componentId].$error.mask\">{{ component.errorLabel || component.label || component.placeholder || component.key }} {{'does not match the mask' | formioTranslate:null:options.building}}.</p>\n  </div>\n</div>\n"
+      "<div\n  ng-show=\"formioForm[componentId].$error && !formioForm[componentId].$pristine\"\n>\n  <div\n    class=\"validationconsent\"\n    ng-show=\"formioForm[componentId].$error.required\"\n  >\n    <ul class=\"list-unstyled validation-errors\">\n      <li class=\"fa fa-exclamation-circle\" aria-hidden=\"true\">\n        <span translate=\"informedConsent_patient.110\"></span>\n      </li>\n    </ul>\n  </div>\n</div>\n"
     );
   }
 ]);
