@@ -1,4 +1,4 @@
-/*! ng-formio v2.38.24 | https://unpkg.com/ng-formio@2.38.24/LICENSE.txt */
+/*! ng-formio v2.38.25 | https://unpkg.com/ng-formio@2.38.25/LICENSE.txt */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.formio = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(_dereq_,module,exports){
 (function (root, factory) {
   // AMD
@@ -98292,7 +98292,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":479}],432:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":480}],432:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function(app) {
   app.provider('formioComponents', function() {
@@ -98436,7 +98436,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":479}],434:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":480}],434:[function(_dereq_,module,exports){
 "use strict";
 
 module.exports = function(app) {
@@ -99061,7 +99061,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":479}],440:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":480}],440:[function(_dereq_,module,exports){
 "use strict";
 
 var GridUtils = _dereq_('../factories/GridUtils')();
@@ -99097,7 +99097,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":479}],441:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":480}],441:[function(_dereq_,module,exports){
 "use strict";
 
 
@@ -99199,7 +99199,7 @@ var app = angular.module('formio');
 _dereq_('./components')(app);
 _dereq_('./textfield')(app);
 _dereq_('./number')(app);
-//require('./password')(app);
+_dereq_('./password')(app);
 _dereq_('./textarea')(app);
 _dereq_('./checkbox')(app);
 _dereq_('./selectboxes')(app);
@@ -99242,7 +99242,7 @@ _dereq_('./timeline')(app);
 _dereq_('./prism')(app);
 _dereq_('./surveyImage')(app);
 
-},{"./address":428,"./button":429,"./checkbox":430,"./columns":431,"./components":432,"./container":433,"./content":434,"./currency":435,"./datetime":436,"./day":437,"./email":438,"./fieldset":439,"./hidden":440,"./htmlelement":441,"./number":443,"./page":444,"./panel":445,"./phonenumber":446,"./prism":447,"./radio":448,"./rangeslider":449,"./select":450,"./selectboxes":451,"./survey":452,"./surveyImage":453,"./table":454,"./textarea":455,"./textfield":456,"./time":457,"./timeline":458,"./well":459}],443:[function(_dereq_,module,exports){
+},{"./address":428,"./button":429,"./checkbox":430,"./columns":431,"./components":432,"./container":433,"./content":434,"./currency":435,"./datetime":436,"./day":437,"./email":438,"./fieldset":439,"./hidden":440,"./htmlelement":441,"./number":443,"./page":444,"./panel":445,"./password":446,"./phonenumber":447,"./prism":448,"./radio":449,"./rangeslider":450,"./select":451,"./selectboxes":452,"./survey":453,"./surveyImage":454,"./table":455,"./textarea":456,"./textfield":457,"./time":458,"./timeline":459,"./well":460}],443:[function(_dereq_,module,exports){
 "use strict";
 
 var createNumberMask = _dereq_('text-mask-addons').createNumberMask;
@@ -99429,7 +99429,39 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":479}],446:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":480}],446:[function(_dereq_,module,exports){
+"use strict";
+module.exports = function(app) {
+  app.config([
+    'formioComponentsProvider',
+    function(formioComponentsProvider) {
+      formioComponentsProvider.register('password', {
+        title: 'Password',
+        template: 'formio/components/textfield.html',
+        tableView: function() {
+          return '--- PROTECTED ---';
+        },
+        settings: {
+          autofocus: false,
+          input: true,
+          tableView: false,
+          inputType: 'password',
+          label: 'Password',
+          key: 'password',
+          placeholder: '',
+          prefix: '',
+          suffix: '',
+          protected: true,
+          persistent: true,
+          hidden: false,
+          clearOnHide: true
+        }
+      });
+    }
+  ]);
+};
+
+},{}],447:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function(app) {
   app.config([
@@ -99466,7 +99498,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],447:[function(_dereq_,module,exports){
+},{}],448:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function (app) {
   app.config([
@@ -99539,7 +99571,7 @@ module.exports = function (app) {
     }
   ]);
 };
-},{}],448:[function(_dereq_,module,exports){
+},{}],449:[function(_dereq_,module,exports){
 "use strict";
 
 
@@ -99592,7 +99624,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],449:[function(_dereq_,module,exports){
+},{}],450:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function (app) {
   app.config([
@@ -99669,7 +99701,7 @@ module.exports = function (app) {
   ]);
 };
 
-},{}],450:[function(_dereq_,module,exports){
+},{}],451:[function(_dereq_,module,exports){
 "use strict";
 /*eslint max-depth: ["error", 6]*/
 
@@ -100294,7 +100326,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"lodash/assign":359,"lodash/cloneDeep":362,"lodash/get":369,"lodash/isEqual":380,"lodash/isNil":386,"lodash/mapValues":399,"lodash/set":405}],451:[function(_dereq_,module,exports){
+},{"lodash/assign":359,"lodash/cloneDeep":362,"lodash/get":369,"lodash/isEqual":380,"lodash/isNil":386,"lodash/mapValues":399,"lodash/set":405}],452:[function(_dereq_,module,exports){
 "use strict";
 
 
@@ -100410,7 +100442,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],452:[function(_dereq_,module,exports){
+},{}],453:[function(_dereq_,module,exports){
 "use strict";
 
 
@@ -100471,7 +100503,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],453:[function(_dereq_,module,exports){
+},{}],454:[function(_dereq_,module,exports){
 "use strict";
 
 
@@ -100533,7 +100565,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],454:[function(_dereq_,module,exports){
+},{}],455:[function(_dereq_,module,exports){
 "use strict";
 
 var GridUtils = _dereq_('../factories/GridUtils')();
@@ -100619,7 +100651,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":479}],455:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":480}],456:[function(_dereq_,module,exports){
 "use strict";
 
 module.exports = function(app) {
@@ -100760,7 +100792,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],456:[function(_dereq_,module,exports){
+},{}],457:[function(_dereq_,module,exports){
 "use strict";
 
 
@@ -100823,7 +100855,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],457:[function(_dereq_,module,exports){
+},{}],458:[function(_dereq_,module,exports){
 "use strict";
 
 var moment = _dereq_('moment');
@@ -100896,7 +100928,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"moment":416}],458:[function(_dereq_,module,exports){
+},{"moment":416}],459:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function (app) {
   app.config([
@@ -100990,7 +101022,7 @@ module.exports = function (app) {
     }
   ]);
 };
-},{}],459:[function(_dereq_,module,exports){
+},{}],460:[function(_dereq_,module,exports){
 "use strict";
 
 var GridUtils = _dereq_('../factories/GridUtils')();
@@ -101050,7 +101082,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":479}],460:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":480}],461:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -101128,7 +101160,7 @@ module.exports = function() {
   };
 };
 
-},{}],461:[function(_dereq_,module,exports){
+},{}],462:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -101696,7 +101728,7 @@ module.exports = function() {
   };
 };
 
-},{}],462:[function(_dereq_,module,exports){
+},{}],463:[function(_dereq_,module,exports){
 "use strict";
 module.exports = ['$sce', '$parse', '$compile', function($sce, $parse, $compile) {
   return {
@@ -101713,7 +101745,7 @@ module.exports = ['$sce', '$parse', '$compile', function($sce, $parse, $compile)
   };
 }];
 
-},{}],463:[function(_dereq_,module,exports){
+},{}],464:[function(_dereq_,module,exports){
 "use strict";
 var _get = _dereq_('lodash/get');
 var moment = _dereq_('moment');
@@ -102088,7 +102120,7 @@ module.exports = [
   }
 ];
 
-},{"lodash/get":369,"moment":416}],464:[function(_dereq_,module,exports){
+},{"lodash/get":369,"moment":416}],465:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -102104,7 +102136,7 @@ module.exports = function() {
   };
 };
 
-},{}],465:[function(_dereq_,module,exports){
+},{}],466:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   'formioComponents',
@@ -102177,7 +102209,7 @@ module.exports = [
   }
 ];
 
-},{}],466:[function(_dereq_,module,exports){
+},{}],467:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -102198,7 +102230,7 @@ module.exports = function() {
   };
 };
 
-},{}],467:[function(_dereq_,module,exports){
+},{}],468:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -102283,7 +102315,7 @@ module.exports = function() {
   };
 };
 
-},{}],468:[function(_dereq_,module,exports){
+},{}],469:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   '$compile',
@@ -102302,7 +102334,7 @@ module.exports = [
   }
 ];
 
-},{}],469:[function(_dereq_,module,exports){
+},{}],470:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -102312,7 +102344,7 @@ module.exports = function() {
   };
 };
 
-},{}],470:[function(_dereq_,module,exports){
+},{}],471:[function(_dereq_,module,exports){
 "use strict";
 var maskInput = _dereq_('vanilla-text-mask').default;
 var createNumberMask = _dereq_('text-mask-addons').createNumberMask;
@@ -102526,7 +102558,7 @@ module.exports = ['FormioUtils', function(FormioUtils) {
   };
 }];
 
-},{"formiojs/utils":188,"lodash":397,"text-mask-addons":424,"vanilla-text-mask":427}],471:[function(_dereq_,module,exports){
+},{"formiojs/utils":188,"lodash":397,"text-mask-addons":424,"vanilla-text-mask":427}],472:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -102553,7 +102585,7 @@ module.exports = function() {
     }
   };
 };
-},{}],472:[function(_dereq_,module,exports){
+},{}],473:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -102581,7 +102613,7 @@ module.exports = function() {
   };
 };
 
-},{}],473:[function(_dereq_,module,exports){
+},{}],474:[function(_dereq_,module,exports){
 "use strict";
 var _map = _dereq_('lodash/map');
 // Javascript editor directive
@@ -102657,7 +102689,7 @@ module.exports = ['FormioUtils', function(FormioUtils) {
   };
 }];
 
-},{"lodash/map":398}],474:[function(_dereq_,module,exports){
+},{"lodash/map":398}],475:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -102689,7 +102721,7 @@ module.exports = function() {
   };
 };
 
-},{}],475:[function(_dereq_,module,exports){
+},{}],476:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -102745,7 +102777,7 @@ module.exports = function() {
   };
 };
 
-},{}],476:[function(_dereq_,module,exports){
+},{}],477:[function(_dereq_,module,exports){
 "use strict";
 var isNaN = _dereq_('lodash/isNaN');
 var isFinite = _dereq_('lodash/isFinite');
@@ -103393,7 +103425,7 @@ module.exports = function() {
   };
 };
 
-},{"lodash/isEmpty":379,"lodash/isFinite":381,"lodash/isNaN":385}],477:[function(_dereq_,module,exports){
+},{"lodash/isEmpty":379,"lodash/isFinite":381,"lodash/isNaN":385}],478:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   'Formio',
@@ -103590,7 +103622,7 @@ module.exports = [
   }
 ];
 
-},{}],478:[function(_dereq_,module,exports){
+},{}],479:[function(_dereq_,module,exports){
 "use strict";
 var formioUtils = _dereq_('formiojs/utils').default;
 var conformToMask = _dereq_('vanilla-text-mask').conformToMask;
@@ -104082,7 +104114,7 @@ module.exports = function() {
   };
 };
 
-},{"formiojs/utils":188,"lodash/filter":366,"lodash/get":369,"vanilla-text-mask":427}],479:[function(_dereq_,module,exports){
+},{"formiojs/utils":188,"lodash/filter":366,"lodash/get":369,"vanilla-text-mask":427}],480:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   var generic = function(data, options) {
@@ -104209,7 +104241,7 @@ module.exports = function() {
   };
 };
 
-},{}],480:[function(_dereq_,module,exports){
+},{}],481:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   '$q',
@@ -104258,7 +104290,7 @@ module.exports = [
   }
 ];
 
-},{}],481:[function(_dereq_,module,exports){
+},{}],482:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   'Formio',
@@ -104304,7 +104336,7 @@ module.exports = [
   }
 ];
 
-},{}],482:[function(_dereq_,module,exports){
+},{}],483:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   'FormioUtils',
@@ -104313,7 +104345,7 @@ module.exports = [
   }
 ];
 
-},{}],483:[function(_dereq_,module,exports){
+},{}],484:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   '$sce',
@@ -104326,7 +104358,7 @@ module.exports = [
   }
 ];
 
-},{}],484:[function(_dereq_,module,exports){
+},{}],485:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
     return function(label, shortcut) {
@@ -104348,7 +104380,7 @@ module.exports = function() {
     };
   }
   
-},{}],485:[function(_dereq_,module,exports){
+},{}],486:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   function() {
@@ -104367,7 +104399,7 @@ module.exports = [
   }
 ];
 
-},{}],486:[function(_dereq_,module,exports){
+},{}],487:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   'formioTableView',
@@ -104380,7 +104412,7 @@ module.exports = [
   }
 ];
 
-},{}],487:[function(_dereq_,module,exports){
+},{}],488:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   'FormioUtils',
@@ -104395,7 +104427,7 @@ module.exports = [
   }
 ];
 
-},{}],488:[function(_dereq_,module,exports){
+},{}],489:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   '$filter',
@@ -104452,7 +104484,7 @@ module.exports = [
   }
 ];
 
-},{}],489:[function(_dereq_,module,exports){
+},{}],490:[function(_dereq_,module,exports){
 "use strict";
 module.exports = ['$sce', function($sce) {
   return function(val) {
@@ -104460,7 +104492,7 @@ module.exports = ['$sce', function($sce) {
   };
 }];
 
-},{}],490:[function(_dereq_,module,exports){
+},{}],491:[function(_dereq_,module,exports){
 "use strict";
 _dereq_('ui-select/dist/select');
 _dereq_('angular-moment');
@@ -104475,7 +104507,7 @@ _dereq_('ng-dialog');
 _dereq_('angular-ui-ace/src/ui-ace');
 _dereq_('./formio');
 
-},{"./formio":491,"angular-ckeditor-legacy":1,"angular-file-saver":2,"angular-moment":3,"angular-sanitize":5,"angular-ui-ace/src/ui-ace":6,"angular-ui-bootstrap":8,"bootstrap":12,"bootstrap-ui-datetime-picker/dist/datetime-picker":11,"ng-dialog":418,"ng-file-upload":420,"ui-select/dist/select":426}],491:[function(_dereq_,module,exports){
+},{"./formio":492,"angular-ckeditor-legacy":1,"angular-file-saver":2,"angular-moment":3,"angular-sanitize":5,"angular-ui-ace/src/ui-ace":6,"angular-ui-bootstrap":8,"bootstrap":12,"bootstrap-ui-datetime-picker/dist/datetime-picker":11,"ng-dialog":418,"ng-file-upload":420,"ui-select/dist/select":426}],492:[function(_dereq_,module,exports){
 "use strict";
 _dereq_('./polyfills/polyfills');
 
@@ -104641,7 +104673,7 @@ app.run([
 
 _dereq_('./components');
 
-},{"./components":442,"./directives/customValidator":460,"./directives/formio":461,"./directives/formioBindHtml.js":462,"./directives/formioComponent":463,"./directives/formioComponentTooltip":464,"./directives/formioComponentView":465,"./directives/formioCustomAttributes":466,"./directives/formioDelete":467,"./directives/formioElement":468,"./directives/formioErrors":469,"./directives/formioMask":470,"./directives/formioMax":471,"./directives/formioMin":472,"./directives/formioScriptEditor":473,"./directives/formioSubmission":474,"./directives/formioSubmissions":475,"./directives/formioWizard":476,"./factories/FormioScope":477,"./factories/FormioUtils":478,"./factories/formioInterceptor":480,"./factories/formioTableView":481,"./filters/flattenComponents":482,"./filters/safehtml":483,"./filters/shortcut":484,"./filters/tableComponents":485,"./filters/tableFieldView":486,"./filters/tableView":487,"./filters/translate":488,"./filters/trusturl":489,"./polyfills/polyfills":493,"./providers/Formio":494}],492:[function(_dereq_,module,exports){
+},{"./components":442,"./directives/customValidator":461,"./directives/formio":462,"./directives/formioBindHtml.js":463,"./directives/formioComponent":464,"./directives/formioComponentTooltip":465,"./directives/formioComponentView":466,"./directives/formioCustomAttributes":467,"./directives/formioDelete":468,"./directives/formioElement":469,"./directives/formioErrors":470,"./directives/formioMask":471,"./directives/formioMax":472,"./directives/formioMin":473,"./directives/formioScriptEditor":474,"./directives/formioSubmission":475,"./directives/formioSubmissions":476,"./directives/formioWizard":477,"./factories/FormioScope":478,"./factories/FormioUtils":479,"./factories/formioInterceptor":481,"./factories/formioTableView":482,"./filters/flattenComponents":483,"./filters/safehtml":484,"./filters/shortcut":485,"./filters/tableComponents":486,"./filters/tableFieldView":487,"./filters/tableView":488,"./filters/translate":489,"./filters/trusturl":490,"./polyfills/polyfills":494,"./providers/Formio":495}],493:[function(_dereq_,module,exports){
 "use strict";
 'use strict';
 
@@ -104672,13 +104704,13 @@ if (typeof Object.assign != 'function') {
   })();
 }
 
-},{}],493:[function(_dereq_,module,exports){
+},{}],494:[function(_dereq_,module,exports){
 "use strict";
 'use strict';
 
 _dereq_('./Object.assign');
 
-},{"./Object.assign":492}],494:[function(_dereq_,module,exports){
+},{"./Object.assign":493}],495:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   // The formio class.
@@ -104776,5 +104808,5 @@ module.exports = function() {
   };
 };
 
-},{"formiojs/Formio":34}]},{},[490])(490)
+},{"formiojs/Formio":34}]},{},[491])(491)
 });

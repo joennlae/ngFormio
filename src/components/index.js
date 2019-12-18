@@ -4,7 +4,7 @@ var app = angular.module('formio');
 require('./components')(app);
 require('./textfield')(app);
 require('./number')(app);
-//require('./password')(app);
+require('./password')(app);
 require('./textarea')(app);
 require('./checkbox')(app);
 require('./selectboxes')(app);

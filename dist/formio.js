@@ -1,4 +1,4 @@
-/*! ng-formio v2.38.24 | https://unpkg.com/ng-formio@2.38.24/LICENSE.txt */
+/*! ng-formio v2.38.25 | https://unpkg.com/ng-formio@2.38.25/LICENSE.txt */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.formio = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(_dereq_,module,exports){
 exports.defaults = {};
 
@@ -41621,7 +41621,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":451}],404:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":452}],404:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function(app) {
   app.provider('formioComponents', function() {
@@ -41765,7 +41765,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":451}],406:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":452}],406:[function(_dereq_,module,exports){
 "use strict";
 
 module.exports = function(app) {
@@ -42390,7 +42390,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":451}],412:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":452}],412:[function(_dereq_,module,exports){
 "use strict";
 
 var GridUtils = _dereq_('../factories/GridUtils')();
@@ -42426,7 +42426,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":451}],413:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":452}],413:[function(_dereq_,module,exports){
 "use strict";
 
 
@@ -42528,7 +42528,7 @@ var app = angular.module('formio');
 _dereq_('./components')(app);
 _dereq_('./textfield')(app);
 _dereq_('./number')(app);
-//require('./password')(app);
+_dereq_('./password')(app);
 _dereq_('./textarea')(app);
 _dereq_('./checkbox')(app);
 _dereq_('./selectboxes')(app);
@@ -42571,7 +42571,7 @@ _dereq_('./timeline')(app);
 _dereq_('./prism')(app);
 _dereq_('./surveyImage')(app);
 
-},{"./address":400,"./button":401,"./checkbox":402,"./columns":403,"./components":404,"./container":405,"./content":406,"./currency":407,"./datetime":408,"./day":409,"./email":410,"./fieldset":411,"./hidden":412,"./htmlelement":413,"./number":415,"./page":416,"./panel":417,"./phonenumber":418,"./prism":419,"./radio":420,"./rangeslider":421,"./select":422,"./selectboxes":423,"./survey":424,"./surveyImage":425,"./table":426,"./textarea":427,"./textfield":428,"./time":429,"./timeline":430,"./well":431}],415:[function(_dereq_,module,exports){
+},{"./address":400,"./button":401,"./checkbox":402,"./columns":403,"./components":404,"./container":405,"./content":406,"./currency":407,"./datetime":408,"./day":409,"./email":410,"./fieldset":411,"./hidden":412,"./htmlelement":413,"./number":415,"./page":416,"./panel":417,"./password":418,"./phonenumber":419,"./prism":420,"./radio":421,"./rangeslider":422,"./select":423,"./selectboxes":424,"./survey":425,"./surveyImage":426,"./table":427,"./textarea":428,"./textfield":429,"./time":430,"./timeline":431,"./well":432}],415:[function(_dereq_,module,exports){
 "use strict";
 
 var createNumberMask = _dereq_('text-mask-addons').createNumberMask;
@@ -42758,7 +42758,39 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":451}],418:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":452}],418:[function(_dereq_,module,exports){
+"use strict";
+module.exports = function(app) {
+  app.config([
+    'formioComponentsProvider',
+    function(formioComponentsProvider) {
+      formioComponentsProvider.register('password', {
+        title: 'Password',
+        template: 'formio/components/textfield.html',
+        tableView: function() {
+          return '--- PROTECTED ---';
+        },
+        settings: {
+          autofocus: false,
+          input: true,
+          tableView: false,
+          inputType: 'password',
+          label: 'Password',
+          key: 'password',
+          placeholder: '',
+          prefix: '',
+          suffix: '',
+          protected: true,
+          persistent: true,
+          hidden: false,
+          clearOnHide: true
+        }
+      });
+    }
+  ]);
+};
+
+},{}],419:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function(app) {
   app.config([
@@ -42795,7 +42827,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],419:[function(_dereq_,module,exports){
+},{}],420:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function (app) {
   app.config([
@@ -42868,7 +42900,7 @@ module.exports = function (app) {
     }
   ]);
 };
-},{}],420:[function(_dereq_,module,exports){
+},{}],421:[function(_dereq_,module,exports){
 "use strict";
 
 
@@ -42921,7 +42953,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],421:[function(_dereq_,module,exports){
+},{}],422:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function (app) {
   app.config([
@@ -42998,7 +43030,7 @@ module.exports = function (app) {
   ]);
 };
 
-},{}],422:[function(_dereq_,module,exports){
+},{}],423:[function(_dereq_,module,exports){
 "use strict";
 /*eslint max-depth: ["error", 6]*/
 
@@ -43623,7 +43655,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"lodash/assign":335,"lodash/cloneDeep":338,"lodash/get":345,"lodash/isEqual":356,"lodash/isNil":362,"lodash/mapValues":375,"lodash/set":381}],423:[function(_dereq_,module,exports){
+},{"lodash/assign":335,"lodash/cloneDeep":338,"lodash/get":345,"lodash/isEqual":356,"lodash/isNil":362,"lodash/mapValues":375,"lodash/set":381}],424:[function(_dereq_,module,exports){
 "use strict";
 
 
@@ -43739,7 +43771,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],424:[function(_dereq_,module,exports){
+},{}],425:[function(_dereq_,module,exports){
 "use strict";
 
 
@@ -43800,7 +43832,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],425:[function(_dereq_,module,exports){
+},{}],426:[function(_dereq_,module,exports){
 "use strict";
 
 
@@ -43862,7 +43894,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],426:[function(_dereq_,module,exports){
+},{}],427:[function(_dereq_,module,exports){
 "use strict";
 
 var GridUtils = _dereq_('../factories/GridUtils')();
@@ -43948,7 +43980,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":451}],427:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":452}],428:[function(_dereq_,module,exports){
 "use strict";
 
 module.exports = function(app) {
@@ -44089,7 +44121,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],428:[function(_dereq_,module,exports){
+},{}],429:[function(_dereq_,module,exports){
 "use strict";
 
 
@@ -44152,7 +44184,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{}],429:[function(_dereq_,module,exports){
+},{}],430:[function(_dereq_,module,exports){
 "use strict";
 
 var moment = _dereq_('moment');
@@ -44225,7 +44257,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"moment":392}],430:[function(_dereq_,module,exports){
+},{"moment":392}],431:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function (app) {
   app.config([
@@ -44319,7 +44351,7 @@ module.exports = function (app) {
     }
   ]);
 };
-},{}],431:[function(_dereq_,module,exports){
+},{}],432:[function(_dereq_,module,exports){
 "use strict";
 
 var GridUtils = _dereq_('../factories/GridUtils')();
@@ -44379,7 +44411,7 @@ module.exports = function(app) {
   ]);
 };
 
-},{"../factories/GridUtils":451}],432:[function(_dereq_,module,exports){
+},{"../factories/GridUtils":452}],433:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -44457,7 +44489,7 @@ module.exports = function() {
   };
 };
 
-},{}],433:[function(_dereq_,module,exports){
+},{}],434:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -45025,7 +45057,7 @@ module.exports = function() {
   };
 };
 
-},{}],434:[function(_dereq_,module,exports){
+},{}],435:[function(_dereq_,module,exports){
 "use strict";
 module.exports = ['$sce', '$parse', '$compile', function($sce, $parse, $compile) {
   return {
@@ -45042,7 +45074,7 @@ module.exports = ['$sce', '$parse', '$compile', function($sce, $parse, $compile)
   };
 }];
 
-},{}],435:[function(_dereq_,module,exports){
+},{}],436:[function(_dereq_,module,exports){
 "use strict";
 var _get = _dereq_('lodash/get');
 var moment = _dereq_('moment');
@@ -45417,7 +45449,7 @@ module.exports = [
   }
 ];
 
-},{"lodash/get":345,"moment":392}],436:[function(_dereq_,module,exports){
+},{"lodash/get":345,"moment":392}],437:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -45433,7 +45465,7 @@ module.exports = function() {
   };
 };
 
-},{}],437:[function(_dereq_,module,exports){
+},{}],438:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   'formioComponents',
@@ -45506,7 +45538,7 @@ module.exports = [
   }
 ];
 
-},{}],438:[function(_dereq_,module,exports){
+},{}],439:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -45527,7 +45559,7 @@ module.exports = function() {
   };
 };
 
-},{}],439:[function(_dereq_,module,exports){
+},{}],440:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -45612,7 +45644,7 @@ module.exports = function() {
   };
 };
 
-},{}],440:[function(_dereq_,module,exports){
+},{}],441:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   '$compile',
@@ -45631,7 +45663,7 @@ module.exports = [
   }
 ];
 
-},{}],441:[function(_dereq_,module,exports){
+},{}],442:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -45641,7 +45673,7 @@ module.exports = function() {
   };
 };
 
-},{}],442:[function(_dereq_,module,exports){
+},{}],443:[function(_dereq_,module,exports){
 "use strict";
 var maskInput = _dereq_('vanilla-text-mask').default;
 var createNumberMask = _dereq_('text-mask-addons').createNumberMask;
@@ -45855,7 +45887,7 @@ module.exports = ['FormioUtils', function(FormioUtils) {
   };
 }];
 
-},{"formiojs/utils":164,"lodash":373,"text-mask-addons":397,"vanilla-text-mask":399}],443:[function(_dereq_,module,exports){
+},{"formiojs/utils":164,"lodash":373,"text-mask-addons":397,"vanilla-text-mask":399}],444:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -45882,7 +45914,7 @@ module.exports = function() {
     }
   };
 };
-},{}],444:[function(_dereq_,module,exports){
+},{}],445:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -45910,7 +45942,7 @@ module.exports = function() {
   };
 };
 
-},{}],445:[function(_dereq_,module,exports){
+},{}],446:[function(_dereq_,module,exports){
 "use strict";
 var _map = _dereq_('lodash/map');
 // Javascript editor directive
@@ -45986,7 +46018,7 @@ module.exports = ['FormioUtils', function(FormioUtils) {
   };
 }];
 
-},{"lodash/map":374}],446:[function(_dereq_,module,exports){
+},{"lodash/map":374}],447:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -46018,7 +46050,7 @@ module.exports = function() {
   };
 };
 
-},{}],447:[function(_dereq_,module,exports){
+},{}],448:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   return {
@@ -46074,7 +46106,7 @@ module.exports = function() {
   };
 };
 
-},{}],448:[function(_dereq_,module,exports){
+},{}],449:[function(_dereq_,module,exports){
 "use strict";
 var isNaN = _dereq_('lodash/isNaN');
 var isFinite = _dereq_('lodash/isFinite');
@@ -46722,7 +46754,7 @@ module.exports = function() {
   };
 };
 
-},{"lodash/isEmpty":355,"lodash/isFinite":357,"lodash/isNaN":361}],449:[function(_dereq_,module,exports){
+},{"lodash/isEmpty":355,"lodash/isFinite":357,"lodash/isNaN":361}],450:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   'Formio',
@@ -46919,7 +46951,7 @@ module.exports = [
   }
 ];
 
-},{}],450:[function(_dereq_,module,exports){
+},{}],451:[function(_dereq_,module,exports){
 "use strict";
 var formioUtils = _dereq_('formiojs/utils').default;
 var conformToMask = _dereq_('vanilla-text-mask').conformToMask;
@@ -47411,7 +47443,7 @@ module.exports = function() {
   };
 };
 
-},{"formiojs/utils":164,"lodash/filter":342,"lodash/get":345,"vanilla-text-mask":399}],451:[function(_dereq_,module,exports){
+},{"formiojs/utils":164,"lodash/filter":342,"lodash/get":345,"vanilla-text-mask":399}],452:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   var generic = function(data, options) {
@@ -47538,7 +47570,7 @@ module.exports = function() {
   };
 };
 
-},{}],452:[function(_dereq_,module,exports){
+},{}],453:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   '$q',
@@ -47587,7 +47619,7 @@ module.exports = [
   }
 ];
 
-},{}],453:[function(_dereq_,module,exports){
+},{}],454:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   'Formio',
@@ -47633,7 +47665,7 @@ module.exports = [
   }
 ];
 
-},{}],454:[function(_dereq_,module,exports){
+},{}],455:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   'FormioUtils',
@@ -47642,7 +47674,7 @@ module.exports = [
   }
 ];
 
-},{}],455:[function(_dereq_,module,exports){
+},{}],456:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   '$sce',
@@ -47655,7 +47687,7 @@ module.exports = [
   }
 ];
 
-},{}],456:[function(_dereq_,module,exports){
+},{}],457:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
     return function(label, shortcut) {
@@ -47677,7 +47709,7 @@ module.exports = function() {
     };
   }
   
-},{}],457:[function(_dereq_,module,exports){
+},{}],458:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   function() {
@@ -47696,7 +47728,7 @@ module.exports = [
   }
 ];
 
-},{}],458:[function(_dereq_,module,exports){
+},{}],459:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   'formioTableView',
@@ -47709,7 +47741,7 @@ module.exports = [
   }
 ];
 
-},{}],459:[function(_dereq_,module,exports){
+},{}],460:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   'FormioUtils',
@@ -47724,7 +47756,7 @@ module.exports = [
   }
 ];
 
-},{}],460:[function(_dereq_,module,exports){
+},{}],461:[function(_dereq_,module,exports){
 "use strict";
 module.exports = [
   '$filter',
@@ -47781,7 +47813,7 @@ module.exports = [
   }
 ];
 
-},{}],461:[function(_dereq_,module,exports){
+},{}],462:[function(_dereq_,module,exports){
 "use strict";
 module.exports = ['$sce', function($sce) {
   return function(val) {
@@ -47789,7 +47821,7 @@ module.exports = ['$sce', function($sce) {
   };
 }];
 
-},{}],462:[function(_dereq_,module,exports){
+},{}],463:[function(_dereq_,module,exports){
 "use strict";
 _dereq_('./polyfills/polyfills');
 
@@ -47955,7 +47987,7 @@ app.run([
 
 _dereq_('./components');
 
-},{"./components":414,"./directives/customValidator":432,"./directives/formio":433,"./directives/formioBindHtml.js":434,"./directives/formioComponent":435,"./directives/formioComponentTooltip":436,"./directives/formioComponentView":437,"./directives/formioCustomAttributes":438,"./directives/formioDelete":439,"./directives/formioElement":440,"./directives/formioErrors":441,"./directives/formioMask":442,"./directives/formioMax":443,"./directives/formioMin":444,"./directives/formioScriptEditor":445,"./directives/formioSubmission":446,"./directives/formioSubmissions":447,"./directives/formioWizard":448,"./factories/FormioScope":449,"./factories/FormioUtils":450,"./factories/formioInterceptor":452,"./factories/formioTableView":453,"./filters/flattenComponents":454,"./filters/safehtml":455,"./filters/shortcut":456,"./filters/tableComponents":457,"./filters/tableFieldView":458,"./filters/tableView":459,"./filters/translate":460,"./filters/trusturl":461,"./polyfills/polyfills":464,"./providers/Formio":465}],463:[function(_dereq_,module,exports){
+},{"./components":414,"./directives/customValidator":433,"./directives/formio":434,"./directives/formioBindHtml.js":435,"./directives/formioComponent":436,"./directives/formioComponentTooltip":437,"./directives/formioComponentView":438,"./directives/formioCustomAttributes":439,"./directives/formioDelete":440,"./directives/formioElement":441,"./directives/formioErrors":442,"./directives/formioMask":443,"./directives/formioMax":444,"./directives/formioMin":445,"./directives/formioScriptEditor":446,"./directives/formioSubmission":447,"./directives/formioSubmissions":448,"./directives/formioWizard":449,"./factories/FormioScope":450,"./factories/FormioUtils":451,"./factories/formioInterceptor":453,"./factories/formioTableView":454,"./filters/flattenComponents":455,"./filters/safehtml":456,"./filters/shortcut":457,"./filters/tableComponents":458,"./filters/tableFieldView":459,"./filters/tableView":460,"./filters/translate":461,"./filters/trusturl":462,"./polyfills/polyfills":465,"./providers/Formio":466}],464:[function(_dereq_,module,exports){
 "use strict";
 'use strict';
 
@@ -47986,13 +48018,13 @@ if (typeof Object.assign != 'function') {
   })();
 }
 
-},{}],464:[function(_dereq_,module,exports){
+},{}],465:[function(_dereq_,module,exports){
 "use strict";
 'use strict';
 
 _dereq_('./Object.assign');
 
-},{"./Object.assign":463}],465:[function(_dereq_,module,exports){
+},{"./Object.assign":464}],466:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function() {
   // The formio class.
@@ -48090,5 +48122,5 @@ module.exports = function() {
   };
 };
 
-},{"formiojs/Formio":10}]},{},[462])(462)
+},{"formiojs/Formio":10}]},{},[463])(463)
 });
