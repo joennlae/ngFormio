@@ -154,7 +154,12 @@
       <div class="row pdf-none">
         <div class="col-100 col-inner-lw-2 lb-1 lt-0-5 left">
           <div ng-if="showNextButton">
-            <div ng-if="currentPage < (pages.length - 1)">
+            <div ng-if="currentPage == 0">
+              <a class="mat-raised-button mat-primary right" ng-click="next()"><span class="mat-button-wrapper"
+                  translate="layer2.3"></span>
+              </a>
+            </div>
+            <div ng-if="currentPage < (pages.length - 1) && currentPage > 0">
               <a class="mat-raised-button mat-primary right" ng-click="next()"><span class="mat-button-wrapper"
                   translate="diary.126"></span>
               </a>
