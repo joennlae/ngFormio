@@ -113,8 +113,40 @@ module.exports = ['FormioUtils', function(FormioUtils) {
           });
         }
 
+        
         if (scope.component.type === 'phoneNumber'){
-          if(scope.component.inputMask) mask = [scope.component.inputMask];
+          if(scope.component.inputMask){
+            if(scope.component.inputMask === '?9?9?9' )
+            mask = function mask(userInput) {
+              let numbers = userInput.match(/\d/g);
+              let numberLength = 0;
+              if (numbers) {
+                numberLength = numbers.join("").length;
+              }
+            
+              if(numberLength < 2) {
+                return [/\d/];
+              } else if (numberLength < 3) {
+                return [/\d/, /\d/];
+              } else {
+                return [/\d/, /\d/, /\d/];
+              }
+            }
+            if(scope.component.inputMask === '?9?9' )
+            mask = function mask(userInput) {
+              let numbers = userInput.match(/\d/g);
+              let numberLength = 0;
+              if (numbers) {
+                numberLength = numbers.join("").length;
+              }
+            
+              if(numberLength < 2) {
+                return [/\d/];
+              } else {
+                return [/\d/, /\d/];
+              } 
+            }
+          }
         }
 
         // Set the mask on the input element.
