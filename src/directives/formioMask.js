@@ -113,6 +113,10 @@ module.exports = ['FormioUtils', function(FormioUtils) {
           });
         }
 
+        if (scope.component.type === 'phoneNumber'){
+          if(scope.component.inputMask) mask = [scope.component.inputMask];
+        }
+
         // Set the mask on the input element.
         if (mask) {
           scope.inputMask = mask;
@@ -121,7 +125,7 @@ module.exports = ['FormioUtils', function(FormioUtils) {
             mask: mask,
             showMask: (format !== 'number' && format !== 'currency' && format !== 'datetime'),
             keepCharPositions: false,
-            guide: true,
+            guide: false,
             placeholderChar: '_'
           });
         }
