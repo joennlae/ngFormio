@@ -25,6 +25,13 @@ module.exports = function(app) {
           view += '</tbody></table>';
           return view;
         },
+        controller: ['$scope', function($scope) {
+          $scope.onSurveyImageClick = function (id){
+            console.log('id of elem', id);
+            let button = document.getElementById(id);
+            button.checked = !button.checked;
+          }
+        }],
         settings: {
           input: true,
           tableView: true,
