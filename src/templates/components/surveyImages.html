@@ -5,14 +5,14 @@
       <th ng-repeat="v in component.values track by $index" style="text-align: center;" ><img
           style='height: auto; max-width: 100%;' src='{{ v.label }}' ng-click='onSurveyImageClick(componentId +"-"+ component.questions[0].value +"-"+ v.value)' />
         <p ng-if='component.text_labels.hasOwnProperty($index)' style='margin-top: 10px;margin-bottom: 5px;'>
-          {{component.text_labels[$index].label}}</p>
+        {{component.text_labels[$index].label}}</p>
       </th>
     </tr>
   </thead>
   <tr ng-repeat="question in component.questions" ng-init="inputName = componentId + '-' + question.value" ng-class="{
       'text-danger': !formioForm[inputName].$pristine && formioForm[inputName].$invalid
     }">
-    <td>{{ question.label }}</td>
+    <td ng-bind-html='question.label'></td>
     <td ng-repeat="v in component.values track by $index" style="text-align: center; vertical-align: middle;">
       <input type="radio" id="{{ componentId }}-{{ question.value }}-{{ v.value }}"
         name="{{ componentId }}-{{ question.value }}" tabindex="{{ component.tabindex || 0 }}" ng-value="v.value"
