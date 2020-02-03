@@ -241,7 +241,7 @@ module.exports = function() {
         };
         // Check for errors.
         $scope.checkErrors = function() {
-            if (!$scope.isValid()) {
+            if (false) { // !$scope.isValid()
                 // Change all of the fields to not be pristine.
                 angular.forEach($element.find('[name="formioForm"]').find('*'), function(element) {
                     var elementScope = angular.element(element).scope();
