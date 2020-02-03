@@ -13,7 +13,7 @@
       'text-danger': !formioForm[inputName].$pristine && formioForm[inputName].$invalid
     }">
     <td>{{ question.label }}</td>
-    <td ng-repeat="v in component.values track by $index" style="text-align: center;">
+    <td ng-repeat="v in component.values track by $index" style="text-align: center; vertical-align: middle;">
       <input type="radio" id="{{ componentId }}-{{ question.value }}-{{ v.value }}"
         name="{{ componentId }}-{{ question.value }}" tabindex="{{ component.tabindex || 0 }}" ng-value="v.value"
         auto-focus="{{ $parent.$first && $first }}" ng-model="data[component.key][question.value]"
