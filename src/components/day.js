@@ -38,18 +38,18 @@ module.exports = function(app) {
         if ($scope.options && $scope.options.building) return;
         $scope.months = [
           {value: '00', label: $scope.component.fields.month.placeholder},
-          {value: '01', label: 'January'},
-          {value: '02', label: 'February'},
-          {value: '03', label: 'March'},
-          {value: '04', label: 'April'},
-          {value: '05', label: 'May'},
-          {value: '06', label: 'June'},
-          {value: '07', label: 'July'},
-          {value: '08', label: 'August'},
-          {value: '09', label: 'September'},
-          {value: '10', label: 'October'},
-          {value: '11', label: 'November'},
-          {value: '12', label: 'December'}
+          {value: '01', label: 'months.0'},
+          {value: '02', label: 'months.1'},
+          {value: '03', label: 'months.2'},
+          {value: '04', label: 'months.3'},
+          {value: '05', label: 'months.4'},
+          {value: '06', label: 'months.5'},
+          {value: '07', label: 'months.6'},
+          {value: '08', label: 'months.7'},
+          {value: '09', label: 'months.8'},
+          {value: '10', label: 'months.9'},
+          {value: '11', label: 'months.10'},
+          {value: '12', label: 'months.11'}
         ];
 
         function isLeapYear(year) {
