@@ -1,4 +1,4 @@
-/*! ng-formio v2.38.30 | https://unpkg.com/ng-formio@2.38.30/LICENSE.txt */
+/*! ng-formio v2.38.31 | https://unpkg.com/ng-formio@2.38.31/LICENSE.txt */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.formio = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(_dereq_,module,exports){
 (function (root, factory) {
   // AMD
@@ -99511,18 +99511,18 @@ module.exports = function(app) {
         if ($scope.options && $scope.options.building) return;
         $scope.months = [
           {value: '00', label: $scope.component.fields.month.placeholder},
-          {value: '01', label: 'January'},
-          {value: '02', label: 'February'},
-          {value: '03', label: 'March'},
-          {value: '04', label: 'April'},
-          {value: '05', label: 'May'},
-          {value: '06', label: 'June'},
-          {value: '07', label: 'July'},
-          {value: '08', label: 'August'},
-          {value: '09', label: 'September'},
-          {value: '10', label: 'October'},
-          {value: '11', label: 'November'},
-          {value: '12', label: 'December'}
+          {value: '01', label: 'months.0'},
+          {value: '02', label: 'months.1'},
+          {value: '03', label: 'months.2'},
+          {value: '04', label: 'months.3'},
+          {value: '05', label: 'months.4'},
+          {value: '06', label: 'months.5'},
+          {value: '07', label: 'months.6'},
+          {value: '08', label: 'months.7'},
+          {value: '09', label: 'months.8'},
+          {value: '10', label: 'months.9'},
+          {value: '11', label: 'months.10'},
+          {value: '12', label: 'months.11'}
         ];
 
         function isLeapYear(year) {
@@ -99750,7 +99750,7 @@ module.exports = function(app) {
         "<div class=\"day-input\">\n  <day-input\n    name=\"{{componentId}}\"\n    component-id=\"componentId\"\n    read-only=\"isDisabled(component, data)\"\n    component=\"component\"\n    ng-required=\"isRequired(component)\"\n    custom-validator=\"component.validate.custom\"\n    aria-labelledby=\"{{ componentId +'Label'}}\"\n    aria-describedby=\"{{componentId + 'Desc'}}\"\n    ng-model=\"data[component.key]\"\n    ng-model-options=\"{allowInvalid: true}\"\n    options=\"options\"\n  ></day-input>\n</div>\n"
       ));
       $templateCache.put('formio/components/day-input.html',
-        "<div class=\"daySelect form row\">\n  <div class=\"form-group col-xs-3\" ng-if=\"component.dayFirst && !component.fields.day.hide\">\n    <label for=\"{{componentId}}-day\" id=\"{{componentId}}-dayLabel\" ng-if=\"component.inputsLabelPosition !== 'bottom'\"\n           ng-class=\"{'field-required': component.fields.day.required}\" ng-style=\"getLabelStyles(component)\">{{ \"Day\" | formioTranslate:null:options.building }}</label>\n    <div ng-style=\"getInputStyles(component)\">\n        <input\n        class=\"form-control\"\n        type=\"number\"\n        id=\"{{componentId}}-day\"\n        ng-model=\"date.day\"\n        ng-model-options=\"{allowInvalid: true}\"\n        aria-labelledby=\"{{ componentId }}-dayLabel\"\n        ng-change=\"onChange()\"\n        style=\"padding-right: 10px;\"\n        auto-focus=\"true\"\n        ng-attr-placeholder=\"{{component.fields.day.placeholder}}\"\n        day-part\n        characters=\"2\"\n        min=\"1\"\n        max=\"{{maxDay}}\"\n        ng-disabled=\"readOnly\"\n      />\n    </div>\n    <label for=\"{{componentId}}-day\" id=\"{{componentId}}-dayLabel\" ng-if=\"component.inputsLabelPosition === 'bottom'\"\n           ng-class=\"{'field-required': component.fields.day.required}\" class=\"control-label--bottom\">{{ \"Day\" | formioTranslate:null:options.building }}</label>\n  </div>\n  <div class=\"form-group col-xs-4\" ng-if=\"!component.fields.month.hide\">\n    <label for=\"{{componentId}}-month\" id=\"{{componentId}}-monthLabel\" ng-if=\"component.inputsLabelPosition !== 'bottom'\" ng-class=\"{'field-required': component.fields.month.required}\" ng-style=\"getLabelStyles(component)\">{{ \"Month\" | formioTranslate:null:options.building }}</label>\n    <div ng-style=\"getInputStyles(component)\">\n      <select\n        class=\"form-control\"\n        type=\"text\"\n        id=\"{{componentId}}-month\"\n        aria-labelledby=\"{{ componentId }}-monthLabel\"\n        ng-model=\"date.month\"\n        ng-model-options=\"{allowInvalid: true}\"\n        auto-focus=\"{{ !component.dayFirst || component.fields.day.hide }}\"\n        ng-change=\"onChange()\"\n        ng-disabled=\"readOnly\"\n        ng-options=\"month.value as month.label | formioTranslate:null:options.building for month in months\"\n      ></select>\n    </div>\n    <label for=\"{{componentId}}-month\" id=\"{{componentId}}-monthLabel\" ng-if=\"component.inputsLabelPosition === 'bottom'\" ng-class=\"{'field-required': component.fields.month.required}\" class=\"control-label--bottom\">{{ \"Month\" | formioTranslate:null:options.building }}</label>\n  </div>\n  <div class=\"form-group col-xs-3\" ng-if =\"!component.dayFirst && !component.fields.day.hide\">\n    <label for=\"{{componentId}}-day1\" id=\"{{componentId}}-day1Label\" ng-if=\"component.inputsLabelPosition !== 'bottom'\"\n           ng-class=\"{'field-required': component.fields.day.required}\" ng-style=\"getLabelStyles(component)\">{{ \"Day\" | formioTranslate:null:options.building }}</label>\n    <div ng-style=\"getInputStyles(component)\">\n      <input\n        class=\"form-control\"\n        type=\"number\"\n        id=\"{{componentId}}-day1\"\n        ng-model=\"date.day\"\n        ng-model-options=\"{allowInvalid: true}\"\n        ng-change=\"onChange()\"\n        style=\"padding-right: 10px;\"\n        aria-labelledby=\"{{ componentId }}-day1Label\"\n        auto-focus=\"{{ component.fields.month.hide }}\"\n        ng-attr-placeholder=\"{{component.fields.day.placeholder}}\"\n        day-part\n        characters=\"2\"\n        min=\"1\"\n        max=\"{{maxDay}}\"\n        ng-disabled=\"readOnly\"\n      />\n    </div>\n    <label for=\"{{componentId}}-day\" id=\"{{componentId}}-day1Label\" ng-if=\"component.inputsLabelPosition === 'bottom'\" ng-class=\"{'field-required': component.fields.day.required}\" class=\"control-label--bottom\">{{ \"Day\" | formioTranslate:null:options.building }}</label>\n  </div>\n  <div class=\"form-group col-xs-5\" ng-if=\"!component.fields.year.hide\">\n    <label for=\"{{componentId}}-year\" id=\"{{componentId}}-yearLabel\" ng-if=\"component.inputsLabelPosition !== 'bottom'\" ng-class=\"{'field-required': component.fields.year.required}\" ng-style=\"getLabelStyles(component)\">{{ \"Year\" | formioTranslate:null:options.building }}</label>\n    <div ng-style=\"getInputStyles(component)\">\n      <input\n        class=\"form-control\"\n        type=\"number\"\n        id=\"{{componentId}}-year\"\n        ng-model=\"date.year\"\n        ng-model-options=\"{allowInvalid: true}\"\n        ng-change=\"onChange()\"\n        aria-labelledby=\"{{ componentId }}-yearLabel\"\n        style=\"padding-right: 10px;\"\n        ng-attr-placeholder=\"{{component.fields.year.placeholder}}\"\n        auto-focus=\"{{ component.fields.day.hide && component.fields.month.hide }}\"\n        characters=\"4\"\n        min=\"0\"\n        max=\"2100\"\n        ng-disabled=\"readOnly\"\n      />\n    </div>\n    <label for=\"{{componentId}}-year\" id=\"{{componentId}}-yearLabel\" ng-if=\"component.inputsLabelPosition === 'bottom'\" ng-class=\"{'field-required': component.fields.year.required}\" class=\"control-label--bottom\">{{ \"Year\" | formioTranslate:null:options.building }}</label>\n  </div>\n</div>\n"
+        "<div class=\"daySelect form row\">\n  <div\n    class=\"form-group col-xs-3\"\n    ng-if=\"component.dayFirst && !component.fields.day.hide\"\n  >\n    <label\n      for=\"{{componentId}}-day\"\n      ng-class=\"{'field-required': component.fields.day.required}\"\n      >{{ \"Day\" | formioTranslate:null:builder }}</label\n    >\n    <input\n      class=\"form-control\"\n      type=\"text\"\n      id=\"{{componentId}}-day\"\n      ng-model=\"date.day\"\n      ng-change=\"onChange()\"\n      style=\"padding-right: 10px;\"\n      ng-attr-placeholder=\"{{component.fields.day.placeholder}}\"\n      day-part\n      characters=\"2\"\n      min=\"0\"\n      max=\"31\"\n      ng-disabled=\"readOnly\"\n    />\n  </div>\n  <div class=\"form-group col-xs-4\" ng-if=\"!component.fields.month.hide\">\n    <div\n      for=\"{{componentId}}-month\"\n      class=\"default col-100 left lb-0-5\"\n      ng-class=\"{'field-required': component.fields.month.required}\"\n    >\n      {{ \"months.12\" | formioTranslate:null:builder }}\n    </div>\n    <select\n      class=\"form-control\"\n      type=\"text\"\n      id=\"{{componentId}}-month\"\n      ng-model=\"date.month\"\n      ng-change=\"onChange()\"\n      ng-disabled=\"readOnly\"\n      ng-options=\"month.value as month.label | formioTranslate:null:builder for month in months\"\n    ></select>\n  </div>\n  <div\n    class=\"form-group col-xs-3\"\n    ng-if=\"!component.dayFirst && !component.fields.day.hide\"\n  >\n    <div\n      for=\"{{componentId}}-day\"\n      class=\"default col-100 left lb-0-5\"\n      ng-class=\"{'field-required': component.fields.day.required}\"\n    >\n      {{ \"months.13\" | formioTranslate:null:builder }}\n    </div>\n    <input\n      class=\"form-control\"\n      type=\"text\"\n      id=\"{{componentId}}-day1\"\n      ng-model=\"date.day\"\n      ng-change=\"onChange()\"\n      style=\"padding-right: 10px;\"\n      ng-attr-placeholder=\"{{component.fields.day.placeholder}}\"\n      day-part\n      characters=\"2\"\n      min=\"0\"\n      max=\"31\"\n      ng-disabled=\"readOnly\"\n    />\n  </div>\n  <div class=\"form-group col-xs-5\" ng-if=\"!component.fields.year.hide\">\n    <div\n      for=\"{{componentId}}-year\"\n      class=\"default col-100 left lb-0-5\"\n      ng-class=\"{'field-required': component.fields.year.required}\"\n    >\n      {{ \"months.14\" | formioTranslate:null:builder }}\n    </div>\n    <input\n      class=\"form-control\"\n      type=\"text\"\n      id=\"{{componentId}}-year\"\n      ng-model=\"date.year\"\n      ng-change=\"onChange()\"\n      style=\"padding-right: 10px;\"\n      ng-attr-placeholder=\"{{component.fields.year.placeholder}}\"\n      characters=\"4\"\n      min=\"0\"\n      max=\"2100\"\n      ng-disabled=\"readOnly\"\n    />\n  </div>\n</div>\n"
       );
     }
   ]);
@@ -102719,6 +102719,13 @@ module.exports = function(app) {
           view += '</tbody></table>';
           return view;
         },
+        controller: ['$scope', function($scope) {
+          $scope.onSurveyImageClick = function (id){
+            console.log('id of elem', id);
+            let button = document.getElementById(id);
+            button.checked = !button.checked;
+          }
+        }],
         settings: {
           input: true,
           tableView: true,
@@ -102746,7 +102753,7 @@ module.exports = function(app) {
     'FormioUtils',
     function($templateCache, FormioUtils) {
       $templateCache.put('formio/components/surveyImages.html', FormioUtils.fieldWrap(
-        "<table class=\"table table-striped table-bordered\">\n  <thead>\n    <tr>\n      <td></td>\n      <th ng-repeat=\"v in component.values track by $index\" style=\"text-align: center;\"><img\n          style='height: auto; max-width: 100%;' src='{{ v.label }}' />\n        <p ng-if='component.text_labels.hasOwnProperty($index)' style='margin-top: 10px;margin-bottom: 5px;'>\n          {{component.text_labels[$index].label}}</p>\n      </th>\n    </tr>\n  </thead>\n  <tr ng-repeat=\"question in component.questions\" ng-init=\"inputName = componentId + '-' + question.value\" ng-class=\"{\n      'text-danger': !formioForm[inputName].$pristine && formioForm[inputName].$invalid\n    }\">\n    <td>{{ question.label }}</td>\n    <td ng-repeat=\"v in component.values track by $index\" style=\"text-align: center;\">\n      <input type=\"radio\" id=\"{{ componentId }}-{{ question.value }}-{{ v.value }}\"\n        name=\"{{ componentId }}-{{ question.value }}\" tabindex=\"{{ component.tabindex || 0 }}\" ng-value=\"v.value\"\n        auto-focus=\"{{ $parent.$first && $first }}\" ng-model=\"data[component.key][question.value]\"\n        ng-model-options=\"{allowInvalid: true}\" ng-required=\"isRequired(component)\" ng-disabled=\"readOnly\"\n        custom-validator=\"component.validate.custom\">\n    </td>\n  </tr>\n</table>"
+        "<table class=\"table table-striped table-bordered\">\n  <thead>\n    <tr>\n      <td></td>\n      <th ng-repeat=\"v in component.values track by $index\" style=\"text-align: center;\" ><img\n          style='height: auto; max-width: 100%;' src='{{ v.label }}' ng-click='onSurveyImageClick(componentId +\"-\"+ component.questions[0].value +\"-\"+ v.value)' />\n        <p ng-if='component.text_labels.hasOwnProperty($index)' style='margin-top: 10px;margin-bottom: 5px;'>\n        {{component.text_labels[$index].label}}</p>\n      </th>\n    </tr>\n  </thead>\n  <tr ng-repeat=\"question in component.questions\" ng-init=\"inputName = componentId + '-' + question.value\" ng-class=\"{\n      'text-danger': !formioForm[inputName].$pristine && formioForm[inputName].$invalid\n    }\">\n    <td ng-bind-html='question.label'></td>\n    <td ng-repeat=\"v in component.values track by $index\" style=\"text-align: center; vertical-align: middle;\">\n      <input type=\"radio\" id=\"{{ componentId }}-{{ question.value }}-{{ v.value }}\"\n        name=\"{{ componentId }}-{{ question.value }}\" tabindex=\"{{ component.tabindex || 0 }}\" ng-value=\"v.value\"\n        auto-focus=\"{{ $parent.$first && $first }}\" ng-model=\"data[component.key][question.value]\"\n        ng-model-options=\"{allowInvalid: true}\" ng-required=\"isRequired(component)\" ng-disabled=\"readOnly\"\n        custom-validator=\"component.validate.custom\">\n    </td>\n  </tr>\n</table>"
       ));
     }
   ]);
@@ -104648,8 +104655,42 @@ module.exports = ['FormioUtils', function(FormioUtils) {
           });
         }
 
+        //https://github.com/webpack-contrib/uglifyjs-webpack-plugin/issues/78 throw uglify error but not easy fixable but we do not need uglified
         if (scope.component.type === 'phoneNumber'){
-          if(scope.component.inputMask) mask = [scope.component.inputMask];
+          if(scope.component.inputMask){
+            if(scope.component.inputMask === '?9?9?9' ) {
+              mask = function mask(userInput) {
+                let numbers = userInput.match(/[\d]/g);
+                let numberLength = 0;
+                if (numbers) {
+                  numberLength = numbers.join("").length;
+                }
+              
+                if(numberLength < 2) {
+                  return [/\d/];
+                } else if (numberLength < 3) {
+                  return [/\d/, /\d/];
+                } else {
+                  return [/\d/, /\d/, /\d/];
+                }
+              }
+            }
+            if(scope.component.inputMask === '?9?9' ) {
+              mask = function mask(userInput) {
+                let numbers = userInput.match(/\d/g);
+                let numberLength = 0;
+                if (numbers) {
+                  numberLength = numbers.join("").length;
+                }
+              
+                if(numberLength < 2) {
+                  return [/\d/];
+                } else {
+                  return [/\d/, /\d/];
+                } 
+              }
+            }
+          }
         }
 
         // Set the mask on the input element.
@@ -105213,7 +105254,7 @@ module.exports = function() {
         };
         // Check for errors.
         $scope.checkErrors = function() {
-            if (!$scope.isValid()) {
+            if (false) { // !$scope.isValid()
                 // Change all of the fields to not be pristine.
                 angular.forEach($element.find('[name="formioForm"]').find('*'), function(element) {
                     var elementScope = angular.element(element).scope();
