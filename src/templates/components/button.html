@@ -1,4 +1,56 @@
-<button ng-attr-type="{{ getButtonType() }}"
+<div ng-if="!!component.description" class="send - message">
+  <h3>Message on Send</h3>
+  <div ng-if="!!component.description">
+    {{ component.description }}
+  </div>
+
+  <br />
+  <div ng-if="!!component.thankyou">
+    {{ component.thankyou }}
+  </div>
+  <hr />
+
+  <h3>Email Message</h3>
+
+  <div ng-if="!!component.emailone">
+    {{ component.emailone }}
+  </div>
+
+  <br />
+  <div ng-if="!!component.emailtwo">
+    {{ component.emailtwo }}
+  </div>
+
+  <br />
+  <div ng-if="!!component.emailthree">
+    {{ component.emailthree }}
+  </div>
+
+  <br />
+  <div ng-if="!!component.emailfour">
+    {{ component.emailfour }}
+  </div>
+
+  <br />
+  <div ng-if="!!component.emailfive">
+    {{ component.emailfive }}
+  </div>
+
+  <br />
+  <div ng-if="!!component.emailsix">
+    {{ component.emailsix }}
+  </div>
+
+  <hr />
+  <div class="message-cue">
+    The message above will appear when a user submits a form. Please review this
+    function via the frontend application only.
+  </div>
+</div>
+
+<div class="button-center">
+  <button
+    ng-attr-type="{{ getButtonType() }}"
     id="{{ componentId }}"
     name="{{ componentId }}"
     ng-class="{'btn-block': component.block, 'btn-disable': disableBtn}"
@@ -6,15 +58,33 @@
     class="btn btn-{{ component.theme }} btn-{{ component.size }}"
     ng-disabled="readOnly || formioForm.submitting || (component.disableOnInvalid && formioForm.$invalid)"
     tabindex="{{ component.tabindex || 0 }}"
-    ng-click="$emit('buttonClick', component, componentId)">
-  <span ng-if="component.leftIcon" class="{{ component.leftIcon }}" aria-hidden="true"></span>
-  <span ng-if="component.leftIcon && component.label">&nbsp;</span>{{ component.label | formioTranslate:null:options.building | shortcut:component.shortcut }}<span ng-if="component.rightIcon && component.label">&nbsp;</span>
-  <span ng-if="component.rightIcon" class="{{ component.rightIcon }}" aria-hidden="true"></span>
-  <formio-component-tooltip></formio-component-tooltip>
-  <i ng-if="component.action == 'submit' && formioForm.submitting" class="glyphicon glyphicon-refresh glyphicon-spin"></i>
-</button>
-<div ng-if="hasError()" class="has-error">
-  <p class="help-block" onclick="scroll=window.scrollTo(0,0)">
-    Please correct all errors before submitting.
-  </p>
+    ng-click="$emit('buttonClick', component, componentId)"
+  >
+    <span
+      ng-if="component.leftIcon"
+      class="{{ component.leftIcon }}"
+      aria-hidden="true"
+    ></span>
+    <span ng-if="component.leftIcon && component.label">&nbsp;</span>{{
+    component.label | formioTranslate:null:options.building |
+    shortcut:component.shortcut }}<span
+      ng-if="component.rightIcon && component.label"
+      >&nbsp;</span
+    >
+    <span
+      ng-if="component.rightIcon"
+      class="{{ component.rightIcon }}"
+      aria-hidden="true"
+    ></span>
+    <formio-component-tooltip></formio-component-tooltip>
+    <i
+      ng-if="component.action == 'submit' && formioForm.submitting"
+      class="glyphicon glyphicon-refresh glyphicon-spin"
+    ></i>
+  </button>
+  <div ng-if="hasError()" class="has-error">
+    <p class="help-block" onclick="scroll=window.scrollTo(0,0)">
+      Please correct all errors before submitting.
+    </p>
+  </div>
 </div>
