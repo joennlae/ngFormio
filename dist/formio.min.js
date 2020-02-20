@@ -1,4 +1,4 @@
-/*! ng-formio v2.38.31 | https://unpkg.com/ng-formio@2.38.31/LICENSE.txt */
+/*! ng-formio v2.38.35 | https://unpkg.com/ng-formio@2.38.35/LICENSE.txt */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.formio = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(_dereq_,module,exports){
 exports.defaults = {};
 
@@ -47983,40 +47983,29 @@ module.exports = ['FormioUtils', function(FormioUtils) {
             }
           });
         }
-
+        function genRegExDigitArray(length){
+          let arr = Array.apply(null, Array(length))
+          return arr.map(_ => /\d/ )
+        }
         //https://github.com/webpack-contrib/uglifyjs-webpack-plugin/issues/78 throw uglify error but not easy fixable but we do not need uglified
         if (scope.component.type === 'phoneNumber'){
           if(scope.component.inputMask){
-            if(scope.component.inputMask === '?9?9?9' ) {
+            if(scope.component.inputMask.match(/(\?9)+/g).length > 0){
               mask = function mask(userInput) {
+                let amount = scope.component.inputMask.match(/(\?9)+/g)[0].length / 2;
                 let numbers = userInput.match(/[\d]/g);
                 let numberLength = 0;
                 if (numbers) {
                   numberLength = numbers.join("").length;
                 }
-              
+                
                 if(numberLength < 2) {
-                  return [/\d/];
-                } else if (numberLength < 3) {
-                  return [/\d/, /\d/];
+                  return genRegExDigitArray(1);
+                } else if (numberLength < amount) {
+                  return genRegExDigitArray(numberLength);
                 } else {
-                  return [/\d/, /\d/, /\d/];
+                  return genRegExDigitArray(amount);
                 }
-              }
-            }
-            if(scope.component.inputMask === '?9?9' ) {
-              mask = function mask(userInput) {
-                let numbers = userInput.match(/\d/g);
-                let numberLength = 0;
-                if (numbers) {
-                  numberLength = numbers.join("").length;
-                }
-              
-                if(numberLength < 2) {
-                  return [/\d/];
-                } else {
-                  return [/\d/, /\d/];
-                } 
               }
             }
           }
