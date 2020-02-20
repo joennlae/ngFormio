@@ -112,40 +112,29 @@ module.exports = ['FormioUtils', function(FormioUtils) {
             }
           });
         }
-
+        function genRegExDigitArray(length){
+          let arr = Array.apply(null, Array(length))
+          return arr.map(_ => /\d/ )
+        }
         //https://github.com/webpack-contrib/uglifyjs-webpack-plugin/issues/78 throw uglify error but not easy fixable but we do not need uglified
         if (scope.component.type === 'phoneNumber'){
           if(scope.component.inputMask){
-            if(scope.component.inputMask === '?9?9?9' ) {
+            if(scope.component.inputMask.match(/(\?9)+/g).length > 0){
               mask = function mask(userInput) {
+                let amount = scope.component.inputMask.match(/(\?9)+/g)[0].length / 2;
                 let numbers = userInput.match(/[\d]/g);
                 let numberLength = 0;
                 if (numbers) {
                   numberLength = numbers.join("").length;
                 }
-              
+                
                 if(numberLength < 2) {
-                  return [/\d/];
-                } else if (numberLength < 3) {
-                  return [/\d/, /\d/];
+                  return genRegExDigitArray(1);
+                } else if (numberLength < amount) {
+                  return genRegExDigitArray(numberLength);
                 } else {
-                  return [/\d/, /\d/, /\d/];
+                  return genRegExDigitArray(amount);
                 }
-              }
-            }
-            if(scope.component.inputMask === '?9?9' ) {
-              mask = function mask(userInput) {
-                let numbers = userInput.match(/\d/g);
-                let numberLength = 0;
-                if (numbers) {
-                  numberLength = numbers.join("").length;
-                }
-              
-                if(numberLength < 2) {
-                  return [/\d/];
-                } else {
-                  return [/\d/, /\d/];
-                } 
               }
             }
           }
