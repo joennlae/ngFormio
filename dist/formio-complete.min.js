@@ -1,4 +1,4 @@
-/*! ng-formio v2.38.35 | https://unpkg.com/ng-formio@2.38.35/LICENSE.txt */
+/*! ng-formio v2.38.36 | https://unpkg.com/ng-formio@2.38.36/LICENSE.txt */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.formio = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(_dereq_,module,exports){
 (function (root, factory) {
   // AMD
@@ -98588,7 +98588,7 @@ module.exports = function(app) {
                 $scope.submission.state = $scope.component.state;
                 return;
               case 'event':
-                $scope.$emit($scope.component.event, $scope.data);
+                $scope.$emit($scope.component.event, $scope.data, $scope.submission);
                 break;
               case 'custom':
                 onCustom();
@@ -103482,7 +103482,7 @@ module.exports = function() {
         var cancelFormLoadEvent = $scope.$on('formLoad', function(event, form) {
           cancelFormLoadEvent();
           $timeout(function() {
-            $scope.setDownloadUrl(form);
+            //$scope.setDownloadUrl(form);
             sendIframeForm(form);
           });
         });
@@ -104661,7 +104661,7 @@ module.exports = ['FormioUtils', function(FormioUtils) {
         //https://github.com/webpack-contrib/uglifyjs-webpack-plugin/issues/78 throw uglify error but not easy fixable but we do not need uglified
         if (scope.component.type === 'phoneNumber'){
           if(scope.component.inputMask){
-            if(scope.component.inputMask.match(/(\?9)+/g).length > 0){
+            if(scope.component.inputMask.match(/(\?9)+/g) !== null && scope.component.inputMask.match(/(\?9)+/g).length > 0){
               mask = function mask(userInput) {
                 let amount = scope.component.inputMask.match(/(\?9)+/g)[0].length / 2;
                 let numbers = userInput.match(/[\d]/g);
