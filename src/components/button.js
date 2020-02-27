@@ -99,7 +99,7 @@ module.exports = function(app) {
                 $scope.submission.state = $scope.component.state;
                 return;
               case 'event':
-                $scope.$emit($scope.component.event, $scope.data);
+                $scope.$emit($scope.component.event, $scope.data, $scope.submission);
                 break;
               case 'custom':
                 onCustom();

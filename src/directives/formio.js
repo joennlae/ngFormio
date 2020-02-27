@@ -124,7 +124,7 @@ module.exports = function() {
         var cancelFormLoadEvent = $scope.$on('formLoad', function(event, form) {
           cancelFormLoadEvent();
           $timeout(function() {
-            $scope.setDownloadUrl(form);
+            //$scope.setDownloadUrl(form);
             sendIframeForm(form);
           });
         });
