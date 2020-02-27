@@ -119,7 +119,7 @@ module.exports = ['FormioUtils', function(FormioUtils) {
         //https://github.com/webpack-contrib/uglifyjs-webpack-plugin/issues/78 throw uglify error but not easy fixable but we do not need uglified
         if (scope.component.type === 'phoneNumber'){
           if(scope.component.inputMask){
-            if(scope.component.inputMask.match(/(\?9)+/g).length > 0){
+            if(scope.component.inputMask.match(/(\?9)+/g) !== null && scope.component.inputMask.match(/(\?9)+/g).length > 0){
               mask = function mask(userInput) {
                 let amount = scope.component.inputMask.match(/(\?9)+/g)[0].length / 2;
                 let numbers = userInput.match(/[\d]/g);
