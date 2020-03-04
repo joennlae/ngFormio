@@ -516,10 +516,6 @@ module.exports = function() {
 
                     $scope.currentPage = parseInt(res.tags[2]) || 0;
                     //console.log($scope.currentUser)
-                    if($localStorage.currentUser.email === 'pashalis.naoumis@gmail.com'){
-                        $scope.currentPage = 0;
-                        console.log($scope.currentPage)
-                    }
 
                 }
                 //console.log($scope.submission.data)
@@ -530,7 +526,7 @@ module.exports = function() {
                     var newPages = [];
                     angular.forEach(allPages, function(page) {
                         if (FormioUtils.isVisible(page, null, data)) {
-                              console.log(page);
+                              //console.log(page);
                             newPages.push(page);
                         }
                     });
