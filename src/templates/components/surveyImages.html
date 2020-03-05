@@ -3,7 +3,7 @@
     <tr>
       <td></td>
       <th ng-repeat="v in component.values track by $index" style="text-align: center;" ><img
-          style='height: auto; max-width: 100%;' src='{{ v.label }}' ng-click='onSurveyImageClick(componentId +"-"+ component.questions[0].value +"-"+ v.value)' />
+          style='height: auto; max-width: 100%;' src='{{ v.label }}' ng-click='onSurveyImageClick(componentId +"-"+ component.questions[0].value +"-"+ v.value, v.value)' />
         <p ng-if='component.text_labels.hasOwnProperty($index)' style='margin-top: 10px;margin-bottom: 5px;'>
         {{component.text_labels[$index].label}}</p>
       </th>

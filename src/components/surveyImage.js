@@ -26,10 +26,15 @@ module.exports = function(app) {
           return view;
         },
         controller: ['$scope', function($scope) {
-          $scope.onSurveyImageClick = function (id){
-            console.log('id of elem', id);
+          $scope.onSurveyImageClick = function (id, value){
+            console.log('id of elem', id, value);
+            //M4-Meatredsize-s-portion-Middle = componentId +"-"+ component.questions[0].value +"-"+ v.value
+            let splitted = id.split('-');
+            console.log(splitted, $scope.component.questions[0].value, $scope.component.key, $scope.data, value);
             let button = document.getElementById(id);
             button.checked = !button.checked;
+            $scope.data[$scope.component.key] = {};
+            $scope.data[$scope.component.key][$scope.component.questions[0].value] = value;
           }
         }],
         settings: {
