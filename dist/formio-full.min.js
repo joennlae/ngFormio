@@ -1,4 +1,4 @@
-/*! ng-formio v2.38.38 | https://unpkg.com/ng-formio@2.38.38/LICENSE.txt */
+/*! ng-formio v2.38.39 | https://unpkg.com/ng-formio@2.38.39/LICENSE.txt */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.formio = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(_dereq_,module,exports){
 (function (root, factory) {
   // AMD
@@ -113320,10 +113320,15 @@ module.exports = function(app) {
           return view;
         },
         controller: ['$scope', function($scope) {
-          $scope.onSurveyImageClick = function (id){
-            console.log('id of elem', id);
+          $scope.onSurveyImageClick = function (id, value){
+            console.log('id of elem', id, value);
+            //M4-Meatredsize-s-portion-Middle = componentId +"-"+ component.questions[0].value +"-"+ v.value
+            let splitted = id.split('-');
+            //console.log(splitted, $scope.component.questions[0].value, $scope.component.key, $scope.data, value);
             let button = document.getElementById(id);
             button.checked = !button.checked;
+            $scope.data[$scope.component.key] = {};
+            $scope.data[$scope.component.key][$scope.component.questions[0].value] = value;
           }
         }],
         settings: {
@@ -113353,7 +113358,7 @@ module.exports = function(app) {
     'FormioUtils',
     function($templateCache, FormioUtils) {
       $templateCache.put('formio/components/surveyImages.html', FormioUtils.fieldWrap(
-        "<table class=\"table table-striped table-bordered\">\n  <thead>\n    <tr>\n      <td></td>\n      <th ng-repeat=\"v in component.values track by $index\" style=\"text-align: center;\" ><img\n          style='height: auto; max-width: 100%;' src='{{ v.label }}' ng-click='onSurveyImageClick(componentId +\"-\"+ component.questions[0].value +\"-\"+ v.value)' />\n        <p ng-if='component.text_labels.hasOwnProperty($index)' style='margin-top: 10px;margin-bottom: 5px;'>\n        {{component.text_labels[$index].label}}</p>\n      </th>\n    </tr>\n  </thead>\n  <tr ng-repeat=\"question in component.questions\" ng-init=\"inputName = componentId + '-' + question.value\" ng-class=\"{\n      'text-danger': !formioForm[inputName].$pristine && formioForm[inputName].$invalid\n    }\">\n    <td ng-bind-html='question.label'></td>\n    <td ng-repeat=\"v in component.values track by $index\" style=\"text-align: center; vertical-align: middle;\">\n      <input type=\"radio\" id=\"{{ componentId }}-{{ question.value }}-{{ v.value }}\"\n        name=\"{{ componentId }}-{{ question.value }}\" tabindex=\"{{ component.tabindex || 0 }}\" ng-value=\"v.value\"\n        auto-focus=\"{{ $parent.$first && $first }}\" ng-model=\"data[component.key][question.value]\"\n        ng-model-options=\"{allowInvalid: true}\" ng-required=\"isRequired(component)\" ng-disabled=\"readOnly\"\n        custom-validator=\"component.validate.custom\">\n    </td>\n  </tr>\n</table>"
+        "<table class=\"table table-striped table-bordered\">\n  <thead>\n    <tr>\n      <td></td>\n      <th ng-repeat=\"v in component.values track by $index\" style=\"text-align: center;\" ><img\n          style='height: auto; max-width: 100%;' src='{{ v.label }}' ng-click='onSurveyImageClick(componentId +\"-\"+ component.questions[0].value +\"-\"+ v.value, v.value)' />\n        <p ng-if='component.text_labels.hasOwnProperty($index)' style='margin-top: 10px;margin-bottom: 5px;'>\n        {{component.text_labels[$index].label}}</p>\n      </th>\n    </tr>\n  </thead>\n  <tr ng-repeat=\"question in component.questions\" ng-init=\"inputName = componentId + '-' + question.value\" ng-class=\"{\n      'text-danger': !formioForm[inputName].$pristine && formioForm[inputName].$invalid\n    }\">\n    <td ng-bind-html='question.label'></td>\n    <td ng-repeat=\"v in component.values track by $index\" style=\"text-align: center; vertical-align: middle;\">\n      <input type=\"radio\" id=\"{{ componentId }}-{{ question.value }}-{{ v.value }}\"\n        name=\"{{ componentId }}-{{ question.value }}\" tabindex=\"{{ component.tabindex || 0 }}\" ng-value=\"v.value\"\n        auto-focus=\"{{ $parent.$first && $first }}\" ng-model=\"data[component.key][question.value]\"\n        ng-model-options=\"{allowInvalid: true}\" ng-required=\"isRequired(component)\" ng-disabled=\"readOnly\"\n        custom-validator=\"component.validate.custom\">\n    </td>\n  </tr>\n</table>"
       ));
     }
   ]);
