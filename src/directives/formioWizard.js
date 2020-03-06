@@ -229,7 +229,7 @@ module.exports = function() {
 
         $scope.clear = function() {
             if ($scope.storage && !$scope.readOnly) {
-                //dataService.obj.submissionData = {};
+                dataService.obj.submissionData = {};
                 $scope.submission.data = {};
                 dataService.obj.perc = "0";
                 dataService.obj.ongoing = true;
